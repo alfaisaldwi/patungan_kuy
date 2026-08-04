@@ -1,7 +1,8 @@
 <div align="center">
 
 <!-- Ganti dengan logo aplikasi kamu (mis. screenshots/logo.png) -->
-<img src="screenshots/logo.png" alt="PatunganKuy Logo" width="120" />
+<img width="1790" height="534" alt="image" src="https://github.com/user-attachments/assets/771e290f-37ea-4c29-b0b9-499fa467fba4" />
+
 
 # 🧾 PatunganKuy
 
@@ -144,7 +145,7 @@ lib/
 
 ```bash
 # Clone repository
-git clone https://github.com/<username>/patungan_kuy.git
+git clone https://github.com/alfaisaldwi/patungan_kuy.git
 cd patungan_kuy
 
 # Install dependencies
@@ -171,8 +172,6 @@ Kontribusi selalu terbuka! Silakan:
 ---
 
 <div align="center">
-
-Dibuat dengan ❤️ dan Flutter
 
 **Patungan? Kuy! 🍜**
 
