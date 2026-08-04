@@ -2,14 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/theme_controller.dart';
 import '../../../../injection_container.dart';
 import '../../../assignment/presentation/models/assignment_result.dart';
 import '../../../assignment/presentation/pages/assignment_page.dart';
+import '../../../history/domain/entities/bill_history.dart';
+import '../../../history/presentation/pages/history_page.dart';
 import '../../../scanner/presentation/bloc/scanner_bloc.dart';
 import '../../domain/entities/calculated_bill.dart';
 import '../../domain/entities/person_order.dart';
 import '../bloc/calculator_bloc.dart';
 import '../utils/receipt_image_generator.dart';
+import '../utils/receipt_pdf_generator.dart';
 
 class CalculatorPage extends StatelessWidget {
   const CalculatorPage({super.key});
@@ -18,8 +22,8 @@ class CalculatorPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<CalculatorBloc>(create: (_) => sl<CalculatorBloc>()),
-        BlocProvider<ScannerBloc>(create: (_) => sl<ScannerBloc>()),
+        BlocProvider<CalculatorBloc>.value(value: sl<CalculatorBloc>()),
+        BlocProvider<ScannerBloc>.value(value: sl<ScannerBloc>()),
       ],
       child: const _CalculatorView(),
     );
@@ -36,6 +40,7 @@ class _CalculatorView extends StatefulWidget {
 class _CalculatorViewState extends State<_CalculatorView> {
   final _receiptKey = GlobalKey();
   bool _isSharing = false;
+  bool _isExporting = false;
 
   Future<void> _onShareReceipt() async {
     if (_isSharing) return;
@@ -44,6 +49,32 @@ class _CalculatorViewState extends State<_CalculatorView> {
       await ReceiptImageGenerator.captureAndShare(context: context, repaintKey: _receiptKey);
     } finally {
       if (mounted) setState(() => _isSharing = false);
+    }
+  }
+
+  Future<void> _openHistory() async {
+    final calc = context.read<CalculatorBloc>();
+    final messenger = ScaffoldMessenger.of(context);
+    final entry = await Navigator.of(context).push<BillHistory>(
+      MaterialPageRoute(builder: (_) => const HistoryPage()),
+    );
+    if (entry != null) {
+      calc.add(RestoreFromHistory(entry: entry));
+      messenger.showSnackBar(
+        SnackBar(content: Text('Bill from ${entry.orders.length} person(s) loaded from history.')),
+      );
+    }
+  }
+
+  Future<void> _onExportPdf() async {
+    if (_isExporting) return;
+    final state = context.read<CalculatorBloc>().state;
+    if (state.result == null) return;
+    setState(() => _isExporting = true);
+    try {
+      await ReceiptPdfGenerator.generateAndShare(context: context, result: state.result!, orders: state.orders);
+    } finally {
+      if (mounted) setState(() => _isExporting = false);
     }
   }
 
@@ -63,9 +94,21 @@ class _CalculatorViewState extends State<_CalculatorView> {
                 child: const Icon(Icons.receipt_long, color: Colors.white, size: 16),
               ),
               const SizedBox(width: 10),
-              const Text('PatunganKuy', style: AppTheme.heading3),
+              Text('PatunganKuy', style: AppTheme.heading3),
             ],
           ),
+          actions: [
+            IconButton(
+              tooltip: 'Bill history',
+              icon: const Icon(Icons.history),
+              onPressed: _openHistory,
+            ),
+            IconButton(
+              tooltip: AppTheme.isDark ? 'Light mode' : 'Dark mode',
+              icon: Icon(AppTheme.isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined),
+              onPressed: ThemeController.toggle,
+            ),
+          ],
         ),
         body: SafeArea(
           child: SingleChildScrollView(
@@ -87,7 +130,12 @@ class _CalculatorViewState extends State<_CalculatorView> {
                 const SizedBox(height: AppTheme.spaceMd),
                 const _ErrorDisplay(),
                 const SizedBox(height: AppTheme.spaceLg),
-                _ShareReceiptButton(receiptKey: _receiptKey, isSharing: _isSharing, onPressed: _onShareReceipt),
+                _ReceiptActions(
+                  isSharing: _isSharing,
+                  isExporting: _isExporting,
+                  onShare: _onShareReceipt,
+                  onExportPdf: _onExportPdf,
+                ),
                 const SizedBox(height: AppTheme.spaceLg),
                 RepaintBoundary(key: _receiptKey, child: const _ReceiptContent()),
                 const SizedBox(height: AppTheme.space2xl),
@@ -162,8 +210,8 @@ class _ScanBanner extends StatelessWidget {
                 decoration: BoxDecoration(color: AppTheme.primaryLight, borderRadius: BorderRadius.circular(10)),
                 child: const Icon(Icons.camera_alt, color: AppTheme.primary, size: 20),
               ),
-              title: const Text('Camera', style: AppTheme.body),
-              subtitle: const Text('Take a photo of your receipt', style: AppTheme.bodySmall),
+              title: Text('Camera', style: AppTheme.body),
+              subtitle: Text('Take a photo of your receipt', style: AppTheme.bodySmall),
               onTap: () {
                 Navigator.pop(context);
                 context.read<ScannerBloc>().add(const PickAndScanImage(fromCamera: true));
@@ -177,8 +225,8 @@ class _ScanBanner extends StatelessWidget {
                 decoration: BoxDecoration(color: AppTheme.accentLight, borderRadius: BorderRadius.circular(10)),
                 child: const Icon(Icons.photo_library, color: AppTheme.accent, size: 20),
               ),
-              title: const Text('Gallery', style: AppTheme.body),
-              subtitle: const Text('Pick a receipt screenshot', style: AppTheme.bodySmall),
+              title: Text('Gallery', style: AppTheme.body),
+              subtitle: Text('Pick a receipt screenshot', style: AppTheme.bodySmall),
               onTap: () {
                 Navigator.pop(context);
                 context.read<ScannerBloc>().add(const PickAndScanImage());
@@ -266,7 +314,7 @@ class _OrdersHeader extends StatelessWidget {
       builder: (context, state) {
         return Row(
           children: [
-            const Text('Orders', style: AppTheme.heading2),
+            Text('Orders', style: AppTheme.heading2),
             const SizedBox(width: AppTheme.spaceSm),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -314,12 +362,12 @@ class _OrderList extends StatelessWidget {
                     color: AppTheme.background,
                     borderRadius: BorderRadius.circular(AppTheme.radiusLg),
                   ),
-                  child: const Icon(Icons.receipt_long_outlined, color: AppTheme.disabledText, size: 28),
+                  child: Icon(Icons.receipt_long_outlined, color: AppTheme.disabledText, size: 28),
                 ),
                 const SizedBox(height: AppTheme.spaceLg),
-                const Text('No orders yet', style: AppTheme.heading3),
+                Text('No orders yet', style: AppTheme.heading3),
                 const SizedBox(height: AppTheme.spaceXs),
-                const Text('Scan a receipt or add manually', style: AppTheme.bodySmall),
+                Text('Scan a receipt or add manually', style: AppTheme.bodySmall),
               ],
             ),
           );
@@ -497,7 +545,7 @@ class _AddPersonFormState extends State<_AddPersonForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Add Person', style: AppTheme.heading3),
+            Text('Add Person', style: AppTheme.heading3),
             const SizedBox(height: AppTheme.spaceMd),
             TextFormField(
               controller: _nameController,
@@ -519,7 +567,7 @@ class _AddPersonFormState extends State<_AddPersonForm> {
                   ),
                 ),
                 const SizedBox(width: 6),
-                const Text('Items', style: AppTheme.label),
+                Text('Items', style: AppTheme.label),
               ],
             ),
             const SizedBox(height: AppTheme.spaceSm),
@@ -645,15 +693,47 @@ class _FeesDiscountSectionState extends State<_FeesDiscountSection> {
     );
   }
 
+  /// Syncs the text fields when fee values change outside this widget
+  /// (receipt scan results or a bill restored from history). A no-op while
+  /// the user is typing, since then controller and state already match.
+  void _syncFromState(CalculatorState s) {
+    setState(() {
+      _isPct = s.isDiscountPercentage;
+      if (AppTheme.parseRupiah(_taxCtrl.text) != s.taxFee) {
+        _taxCtrl.text = s.taxFee > 0 ? AppTheme.formatRupiah(s.taxFee) : '';
+      }
+      if (AppTheme.parseRupiah(_deliveryCtrl.text) != s.deliveryFee) {
+        _deliveryCtrl.text = s.deliveryFee > 0 ? AppTheme.formatRupiah(s.deliveryFee) : '';
+      }
+      if (AppTheme.parseRupiah(_discountCtrl.text) != s.discountAmount) {
+        _discountCtrl.text = s.discountAmount > 0
+            ? (_isPct ? s.discountAmount.toString() : AppTheme.formatRupiah(s.discountAmount))
+            : '';
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    return BlocListener<CalculatorBloc, CalculatorState>(
+      listenWhen: (prev, curr) =>
+          prev.taxFee != curr.taxFee ||
+          prev.deliveryFee != curr.deliveryFee ||
+          prev.discountAmount != curr.discountAmount ||
+          prev.isDiscountPercentage != curr.isDiscountPercentage,
+      listener: (context, state) => _syncFromState(state),
+      child: _buildCard(context),
+    );
+  }
+
+  Widget _buildCard(BuildContext context) {
     return Container(
       decoration: AppTheme.cardDecoration,
       padding: const EdgeInsets.all(AppTheme.paddingCard),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Fees & Discount', style: AppTheme.heading3),
+          Text('Fees & Discount', style: AppTheme.heading3),
           const SizedBox(height: AppTheme.spaceMd),
           TextFormField(
             controller: _deliveryCtrl,
@@ -683,7 +763,7 @@ class _FeesDiscountSectionState extends State<_FeesDiscountSection> {
             onChanged: (_) => _emit(),
           ),
           SwitchListTile(
-            title: const Text('Discount is percentage', style: AppTheme.bodySmall),
+            title: Text('Discount is percentage', style: AppTheme.bodySmall),
             value: _isPct,
             onChanged: (v) {
               setState(() => _isPct = v);
@@ -748,27 +828,47 @@ class _ErrorDisplay extends StatelessWidget {
   }
 }
 
-class _ShareReceiptButton extends StatelessWidget {
-  final GlobalKey receiptKey;
+class _ReceiptActions extends StatelessWidget {
   final bool isSharing;
-  final VoidCallback onPressed;
-  const _ShareReceiptButton({required this.receiptKey, required this.isSharing, required this.onPressed});
+  final bool isExporting;
+  final VoidCallback onShare;
+  final VoidCallback onExportPdf;
+  const _ReceiptActions({
+    required this.isSharing,
+    required this.isExporting,
+    required this.onShare,
+    required this.onExportPdf,
+  });
+
+  static const _spinner = SizedBox(
+    width: 18,
+    height: 18,
+    child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primary),
+  );
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<CalculatorBloc, CalculatorState>(
       builder: (context, state) {
         if (state.status != CalculatorStatus.calculated) return const SizedBox.shrink();
-        return OutlinedButton.icon(
-          onPressed: isSharing ? null : onPressed,
-          icon: isSharing
-              ? const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primary),
-                )
-              : const Icon(Icons.share_rounded),
-          label: Text(isSharing ? 'Generating...' : 'Share Receipt'),
+        return Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: isSharing ? null : onShare,
+                icon: isSharing ? _spinner : const Icon(Icons.share_rounded),
+                label: Text(isSharing ? 'Generating...' : 'Share'),
+              ),
+            ),
+            const SizedBox(width: AppTheme.spaceMd),
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: isExporting ? null : onExportPdf,
+                icon: isExporting ? _spinner : const Icon(Icons.picture_as_pdf_rounded),
+                label: Text(isExporting ? 'Exporting...' : 'Export PDF'),
+              ),
+            ),
+          ],
         );
       },
     );
@@ -807,7 +907,7 @@ class _ReceiptContent extends StatelessWidget {
                 child: const Icon(Icons.receipt_long, color: Colors.white, size: 24),
               ),
               const SizedBox(height: AppTheme.spaceSm),
-              const Text('PatunganKuy Receipt', style: AppTheme.heading3),
+              Text('PatunganKuy Receipt', style: AppTheme.heading3),
               Text(_fmt(DateTime.now()), style: AppTheme.bodySmall),
               const SizedBox(height: AppTheme.spaceXl),
               _RRow(label: 'Total Base', value: r.totalBase),
@@ -830,7 +930,7 @@ class _ReceiptContent extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 6),
-                  const Text('Per Person', style: AppTheme.label),
+                  Text('Per Person', style: AppTheme.label),
                 ],
               ),
               const SizedBox(height: AppTheme.spaceSm),
@@ -964,7 +1064,7 @@ class _EditPersonDialogState extends State<_EditPersonDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Edit Order', style: AppTheme.heading3),
+      title: Text('Edit Order', style: AppTheme.heading3),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusXl)),
       content: SizedBox(
         width: double.maxFinite,
@@ -981,7 +1081,7 @@ class _EditPersonDialogState extends State<_EditPersonDialog> {
                   validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
                 ),
                 const SizedBox(height: AppTheme.spaceLg),
-                const Text('Items', style: AppTheme.label),
+                Text('Items', style: AppTheme.label),
                 const SizedBox(height: AppTheme.spaceSm),
                 ...List.generate(_itemCtrls.length, (i) {
                   final c = _itemCtrls[i];

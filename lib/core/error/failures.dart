@@ -11,3 +11,7 @@ abstract class Failure {
 class CalculatorFailure extends Failure {
   const CalculatorFailure(super.message);
 }
+
+class HistoryFailure extends Failure {
+  const HistoryFailure(super.message);
+}

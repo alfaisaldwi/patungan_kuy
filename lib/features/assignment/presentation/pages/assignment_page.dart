@@ -97,7 +97,7 @@ class _AssignmentViewState extends State<_AssignmentView> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(title: const Text('Item Assignment', style: AppTheme.heading3)),
+        appBar: AppBar(title: Text('Item Assignment', style: AppTheme.heading3)),
         body: SafeArea(
           child: Column(
             children: [
@@ -143,12 +143,12 @@ class _AssignmentViewState extends State<_AssignmentView> {
                                 color: AppTheme.background,
                                 borderRadius: BorderRadius.circular(AppTheme.radiusXl),
                               ),
-                              child: const Icon(Icons.people_outline, color: AppTheme.disabledText, size: 32),
+                              child: Icon(Icons.people_outline, color: AppTheme.disabledText, size: 32),
                             ),
                             const SizedBox(height: AppTheme.spaceLg),
-                            const Text('Add group members', style: AppTheme.heading3),
+                            Text('Add group members', style: AppTheme.heading3),
                             const SizedBox(height: AppTheme.spaceXs),
-                            const Text('Assign scanned items to each person', style: AppTheme.bodySmall),
+                            Text('Assign scanned items to each person', style: AppTheme.bodySmall),
                           ],
                         ),
                       );

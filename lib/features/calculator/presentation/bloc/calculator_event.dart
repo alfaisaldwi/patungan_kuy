@@ -57,3 +57,12 @@ class UpdateFeesAndDiscount extends CalculatorEvent {
 class CalculateBillEvent extends CalculatorEvent {
   const CalculateBillEvent();
 }
+
+class RestoreFromHistory extends CalculatorEvent {
+  final BillHistory entry;
+
+  const RestoreFromHistory({required this.entry});
+
+  @override
+  List<Object?> get props => [entry];
+}
