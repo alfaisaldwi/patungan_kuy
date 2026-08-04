@@ -39,8 +39,16 @@ class _CalculatorView extends StatefulWidget {
 
 class _CalculatorViewState extends State<_CalculatorView> {
   final _receiptKey = GlobalKey();
+  final _scrollController = ScrollController();
+  final _receiptContentKey = GlobalKey();
   bool _isSharing = false;
   bool _isExporting = false;
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   Future<void> _onShareReceipt() async {
     if (_isSharing) return;
@@ -58,12 +66,30 @@ class _CalculatorViewState extends State<_CalculatorView> {
     final entry = await Navigator.of(context).push<BillHistory>(
       MaterialPageRoute(builder: (_) => const HistoryPage()),
     );
-    if (entry != null) {
-      calc.add(RestoreFromHistory(entry: entry));
-      messenger.showSnackBar(
-        SnackBar(content: Text('Bill from ${entry.orders.length} person(s) loaded from history.')),
+    if (entry == null || !mounted) return;
+
+    if (calc.state.orders.isNotEmpty || calc.state.result != null) {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text('Load from History?', style: AppTheme.heading3),
+          content: Text(
+            'Loading this bill will replace your current ${calc.state.orders.length} order(s) and calculation.',
+            style: AppTheme.body,
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+            ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Replace')),
+          ],
+        ),
       );
+      if (confirmed != true) return;
     }
+
+    calc.add(RestoreFromHistory(entry: entry));
+    messenger.showSnackBar(
+      SnackBar(content: Text('Bill from ${entry.orders.length} person(s) loaded from history.')),
+    );
   }
 
   Future<void> _onExportPdf() async {
@@ -78,9 +104,57 @@ class _CalculatorViewState extends State<_CalculatorView> {
     }
   }
 
+  void _confirmReset() {
+    final state = context.read<CalculatorBloc>().state;
+    if (state.orders.isEmpty && state.result == null) return;
+    showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Reset All?', style: AppTheme.heading3),
+        content: Text(
+          state.orders.isNotEmpty
+              ? 'All ${state.orders.length} order(s) and the calculation result will be cleared.'
+              : 'The calculation result will be cleared.',
+          style: AppTheme.body,
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx, true);
+              context.read<CalculatorBloc>().add(const ResetCalculator());
+            },
+            child: const Text('Reset', style: TextStyle(color: AppTheme.error)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _scrollToReceipt() {
+    final ctx = _receiptContentKey.currentContext;
+    if (ctx == null) return;
+    Scrollable.ensureVisible(
+      ctx,
+      alignment: 0.1,
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeOut,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BlocListener<ScannerBloc, ScannerState>(
+    return BlocListener<CalculatorBloc, CalculatorState>(
+      listenWhen: (prev, curr) =>
+          curr.status == CalculatorStatus.calculated &&
+          prev.status != CalculatorStatus.calculated &&
+          curr.result != null,
+      listener: (context, state) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _scrollToReceipt();
+        });
+      },
+      child: BlocListener<ScannerBloc, ScannerState>(
       listener: _onScannerStateChanged,
       child: Scaffold(
         appBar: AppBar(
@@ -98,6 +172,16 @@ class _CalculatorViewState extends State<_CalculatorView> {
             ],
           ),
           actions: [
+            BlocBuilder<CalculatorBloc, CalculatorState>(
+              builder: (context, state) {
+                final hasData = state.orders.isNotEmpty || state.result != null;
+                return IconButton(
+                  tooltip: 'Reset',
+                  icon: const Icon(Icons.refresh_rounded),
+                  onPressed: hasData ? _confirmReset : null,
+                );
+              },
+            ),
             IconButton(
               tooltip: 'Bill history',
               icon: const Icon(Icons.history),
@@ -112,6 +196,7 @@ class _CalculatorViewState extends State<_CalculatorView> {
         ),
         body: SafeArea(
           child: SingleChildScrollView(
+            controller: _scrollController,
             padding: const EdgeInsets.symmetric(horizontal: AppTheme.paddingPage, vertical: AppTheme.spaceLg),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -137,12 +222,13 @@ class _CalculatorViewState extends State<_CalculatorView> {
                   onExportPdf: _onExportPdf,
                 ),
                 const SizedBox(height: AppTheme.spaceLg),
-                RepaintBoundary(key: _receiptKey, child: const _ReceiptContent()),
+                RepaintBoundary(key: _receiptKey, child: _ReceiptContent(key: _receiptContentKey)),
                 const SizedBox(height: AppTheme.space2xl),
               ],
             ),
           ),
         ),
+      ),
       ),
     );
   }
@@ -244,7 +330,7 @@ class _ScanBanner extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: [AppTheme.primary, Color(0xFFFF8E8E)]),
+        gradient: LinearGradient(colors: AppTheme.primaryGradient),
         borderRadius: BorderRadius.circular(AppTheme.radiusXl),
         boxShadow: [AppTheme.shadowMd],
       ),
@@ -264,12 +350,12 @@ class _ScanBanner extends StatelessWidget {
                   decoration: BoxDecoration(color: Colors.white.withAlpha(51), borderRadius: BorderRadius.circular(12)),
                   child: isScanning
                       ? const Center(
-                          child: SizedBox(
-                            width: 22,
-                            height: 22,
-                            child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
-                          ),
-                        )
+                        child: SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
+                        ),
+                      )
                       : const Icon(Icons.document_scanner, color: Colors.white),
                 ),
                 const SizedBox(width: AppTheme.spaceLg),
@@ -410,7 +496,7 @@ class _OrderTile extends StatelessWidget {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(colors: [AppTheme.primary, Color(0xFFFF8E8E)]),
+                    gradient: LinearGradient(colors: AppTheme.primaryGradient),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Center(
@@ -486,6 +572,7 @@ class _AddPersonFormState extends State<_AddPersonForm> {
   final _nameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   final _itemControllers = <({TextEditingController name, TextEditingController price})>[];
+  bool _isExpanded = false;
 
   @override
   void initState() {
@@ -533,122 +620,165 @@ class _AddPersonFormState extends State<_AddPersonForm> {
     }
     _itemControllers.clear();
     _addItemRow();
+    setState(() => _isExpanded = false);
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: AppTheme.cardDecoration,
-      padding: const EdgeInsets.all(AppTheme.paddingCard),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Add Person', style: AppTheme.heading3),
-            const SizedBox(height: AppTheme.spaceMd),
-            TextFormField(
-              controller: _nameController,
-              decoration: AppTheme.inputDecoration(label: 'Person Name', hint: 'e.g. Budi'),
-              validator: (v) => (v == null || v.trim().isEmpty) ? 'Name required' : null,
-            ),
-            const SizedBox(height: AppTheme.spaceLg),
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: AppTheme.primaryLight,
-                    borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+      child: Column(
+        children: [
+          GestureDetector(
+            onTap: () => setState(() => _isExpanded = !_isExpanded),
+            behavior: HitTestBehavior.opaque,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppTheme.paddingCard, vertical: AppTheme.spaceMd),
+              child: Row(
+                children: [
+                  AnimatedRotation(
+                    turns: _isExpanded ? 0.5 : 0.0,
+                    duration: const Duration(milliseconds: 200),
+                    child: Icon(Icons.keyboard_arrow_down_rounded, color: AppTheme.textSecondary),
                   ),
-                  child: Text(
-                    '${_itemControllers.length}',
-                    style: AppTheme.caption.copyWith(color: AppTheme.primary, fontWeight: FontWeight.w700),
+                  const SizedBox(width: AppTheme.spaceSm),
+                  Text('Add Person', style: AppTheme.heading3),
+                  const Spacer(),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: _isExpanded ? AppTheme.primaryLight : AppTheme.background,
+                      borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+                    ),
+                    child: Text(
+                      _isExpanded ? 'Hide' : 'Show',
+                      style: AppTheme.caption.copyWith(
+                        color: _isExpanded ? AppTheme.primary : AppTheme.textHint,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 6),
-                Text('Items', style: AppTheme.label),
-              ],
+                ],
+              ),
             ),
-            const SizedBox(height: AppTheme.spaceSm),
-            ...List.generate(_itemControllers.length, (i) {
-              final c = _itemControllers[i];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Row(
+          ),
+          AnimatedCrossFade(
+            firstChild: const SizedBox(width: double.infinity),
+            secondChild: Padding(
+              padding: const EdgeInsets.fromLTRB(AppTheme.paddingCard, 0, AppTheme.paddingCard, AppTheme.paddingCard),
+              child: Form(
+                key: _formKey,
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      flex: 3,
-                      child: TextFormField(
-                        controller: c.name,
-                        decoration: AppTheme.inputDecoration(label: 'Item name', hint: 'Nasi Goreng'),
+                    TextFormField(
+                      controller: _nameController,
+                      decoration: AppTheme.inputDecoration(label: 'Person Name', hint: 'e.g. Budi'),
+                      validator: (v) => (v == null || v.trim().isEmpty) ? 'Name required' : null,
+                    ),
+                    const SizedBox(height: AppTheme.spaceLg),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primaryLight,
+                            borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+                          ),
+                          child: Text(
+                            '${_itemControllers.length}',
+                            style: AppTheme.caption.copyWith(color: AppTheme.primary, fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Text('Items', style: AppTheme.label),
+                      ],
+                    ),
+                    const SizedBox(height: AppTheme.spaceSm),
+                    ...List.generate(_itemControllers.length, (i) {
+                      final c = _itemControllers[i];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              flex: 3,
+                              child: TextFormField(
+                                controller: c.name,
+                                decoration: AppTheme.inputDecoration(label: 'Item name', hint: 'Nasi Goreng'),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              flex: 2,
+                              child: TextFormField(
+                                controller: c.price,
+                                decoration: AppTheme.inputDecoration(label: 'Price', hint: '25000'),
+                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                inputFormatters: [AppTheme.rupiahFormatter],
+                                validator: i == 0
+                                    ? (v) {
+                                        if (v == null || v.trim().isEmpty) return 'Required';
+                                        final p = AppTheme.parseRupiah(v);
+                                        if (p <= 0) return 'Invalid';
+                                        return null;
+                                      }
+                                    : null,
+                              ),
+                            ),
+                            SizedBox(
+                              width: 36,
+                              child: _itemControllers.length > 1
+                                  ? _SmallIconButton(
+                                      icon: Icons.remove_rounded,
+                                      color: AppTheme.error,
+                                      onTap: () => _removeItemRow(i),
+                                    )
+                                  : null,
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                    GestureDetector(
+                      onTap: _addItemRow,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppTheme.border, width: 1),
+                          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                        ),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.add_rounded, size: 18, color: AppTheme.primary),
+                            SizedBox(width: 4),
+                            Text(
+                              'Add Item',
+                              style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.w600),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      flex: 2,
-                      child: TextFormField(
-                        controller: c.price,
-                        decoration: AppTheme.inputDecoration(label: 'Price', hint: '25000'),
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        inputFormatters: [AppTheme.rupiahFormatter],
-                        validator: i == 0
-                            ? (v) {
-                                if (v == null || v.trim().isEmpty) return 'Required';
-                                final p = AppTheme.parseRupiah(v);
-                                if (p <= 0) return 'Invalid';
-                                return null;
-                              }
-                            : null,
-                      ),
-                    ),
+                    const SizedBox(height: AppTheme.spaceMd),
                     SizedBox(
-                      width: 36,
-                      child: _itemControllers.length > 1
-                          ? _SmallIconButton(
-                              icon: Icons.remove_rounded,
-                              color: AppTheme.error,
-                              onTap: () => _removeItemRow(i),
-                            )
-                          : null,
-                    ),
-                  ],
-                ),
-              );
-            }),
-            GestureDetector(
-              onTap: _addItemRow,
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                decoration: BoxDecoration(
-                  border: Border.all(color: AppTheme.border, width: 1),
-                  borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.add_rounded, size: 18, color: AppTheme.primary),
-                    SizedBox(width: 4),
-                    Text(
-                      'Add Item',
-                      style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.w600),
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: _submit,
+                        icon: const Icon(Icons.person_add_alt, size: 18),
+                        label: const Text('Save'),
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: AppTheme.spaceMd),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: _submit,
-                icon: const Icon(Icons.person_add_alt, size: 18),
-                label: const Text('Save'),
-              ),
-            ),
-          ],
-        ),
+            crossFadeState: _isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+            duration: const Duration(milliseconds: 250),
+          ),
+        ],
       ),
     );
   }
@@ -727,53 +857,83 @@ class _FeesDiscountSectionState extends State<_FeesDiscountSection> {
   }
 
   Widget _buildCard(BuildContext context) {
-    return Container(
-      decoration: AppTheme.cardDecoration,
-      padding: const EdgeInsets.all(AppTheme.paddingCard),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Fees & Discount', style: AppTheme.heading3),
-          const SizedBox(height: AppTheme.spaceMd),
-          TextFormField(
-            controller: _deliveryCtrl,
-            decoration: AppTheme.inputDecoration(label: 'Delivery Fee', hint: '0'),
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            inputFormatters: [AppTheme.rupiahFormatter],
-            onChanged: (_) => _emit(),
+    return BlocBuilder<CalculatorBloc, CalculatorState>(
+      builder: (context, state) {
+        final feesTotal = state.taxFee + state.deliveryFee;
+        final hasFees = feesTotal > 0 || state.discountAmount > 0;
+        final baseTotal = state.orders.fold<double>(0, (s, o) => s + o.totalPrice);
+
+        return Container(
+          decoration: AppTheme.cardDecoration,
+          padding: const EdgeInsets.all(AppTheme.paddingCard),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Fees & Discount', style: AppTheme.heading3),
+              const SizedBox(height: AppTheme.spaceMd),
+              TextFormField(
+                controller: _deliveryCtrl,
+                decoration: AppTheme.inputDecoration(label: 'Delivery Fee', hint: '0'),
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                inputFormatters: [AppTheme.rupiahFormatter],
+                onChanged: (_) => _emit(),
+              ),
+              const SizedBox(height: AppTheme.spaceSm),
+              TextFormField(
+                controller: _taxCtrl,
+                decoration: AppTheme.inputDecoration(label: 'Tax', hint: '0'),
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                inputFormatters: [AppTheme.rupiahFormatter],
+                onChanged: (_) => _emit(),
+              ),
+              const SizedBox(height: AppTheme.spaceSm),
+              TextFormField(
+                controller: _discountCtrl,
+                decoration: AppTheme.inputDecoration(
+                  label: _isPct ? 'Discount (%)' : 'Discount',
+                  hint: '0',
+                  prefixText: _isPct ? '% ' : null,
+                ),
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                inputFormatters: _isPct ? null : [AppTheme.rupiahFormatter],
+                onChanged: (_) => _emit(),
+              ),
+              SwitchListTile(
+                title: Text('Discount is percentage', style: AppTheme.bodySmall),
+                value: _isPct,
+                onChanged: (v) {
+                  setState(() => _isPct = v);
+                  _emit();
+                },
+                contentPadding: EdgeInsets.zero,
+                activeColor: AppTheme.primary,
+              ),
+              if (hasFees && baseTotal > 0) ...[
+                const Divider(height: 16),
+                Row(
+                  children: [
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: AppTheme.accent,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Subtotal ${AppTheme.formatRupiah(baseTotal)} + Fees ${AppTheme.formatRupiah(feesTotal)} = ${AppTheme.formatRupiah(baseTotal + feesTotal - state.discountAmount)}',
+                        style: AppTheme.bodySmall.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ],
           ),
-          const SizedBox(height: AppTheme.spaceSm),
-          TextFormField(
-            controller: _taxCtrl,
-            decoration: AppTheme.inputDecoration(label: 'Tax', hint: '0'),
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            inputFormatters: [AppTheme.rupiahFormatter],
-            onChanged: (_) => _emit(),
-          ),
-          const SizedBox(height: AppTheme.spaceSm),
-          TextFormField(
-            controller: _discountCtrl,
-            decoration: AppTheme.inputDecoration(
-              label: _isPct ? 'Discount (%)' : 'Discount',
-              hint: '0',
-              prefixText: _isPct ? '% ' : null,
-            ),
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            inputFormatters: _isPct ? null : [AppTheme.rupiahFormatter],
-            onChanged: (_) => _emit(),
-          ),
-          SwitchListTile(
-            title: Text('Discount is percentage', style: AppTheme.bodySmall),
-            value: _isPct,
-            onChanged: (v) {
-              setState(() => _isPct = v);
-              _emit();
-            },
-            contentPadding: EdgeInsets.zero,
-            activeColor: AppTheme.primary,
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -876,7 +1036,7 @@ class _ReceiptActions extends StatelessWidget {
 }
 
 class _ReceiptContent extends StatelessWidget {
-  const _ReceiptContent();
+  const _ReceiptContent({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -901,14 +1061,14 @@ class _ReceiptContent extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [AppTheme.accent, Color(0xFF7EDDD6)]),
+                  gradient: LinearGradient(colors: AppTheme.accentGradient),
                   borderRadius: BorderRadius.circular(AppTheme.radiusLg),
                 ),
                 child: const Icon(Icons.receipt_long, color: Colors.white, size: 24),
               ),
               const SizedBox(height: AppTheme.spaceSm),
               Text('PatunganKuy Receipt', style: AppTheme.heading3),
-              Text(_fmt(DateTime.now()), style: AppTheme.bodySmall),
+              Text(_fmt(r.calculatedAt), style: AppTheme.bodySmall),
               const SizedBox(height: AppTheme.spaceXl),
               _RRow(label: 'Total Base', value: r.totalBase),
               _RRow(label: 'Total Fees', value: r.totalFees),

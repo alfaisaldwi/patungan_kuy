@@ -8,14 +8,16 @@ class BillResult extends Equatable {
   final double totalFees;
   final double totalDiscount;
   final double grandTotal;
+  final DateTime calculatedAt;
 
-  const BillResult({
+  BillResult({
     required this.calculatedBills,
     required this.totalBase,
     required this.totalFees,
     required this.totalDiscount,
     required this.grandTotal,
-  });
+    DateTime? calculatedAt,
+  }) : calculatedAt = calculatedAt ?? DateTime.now();
 
   @override
   List<Object?> get props => [
@@ -24,5 +26,6 @@ class BillResult extends Equatable {
         totalFees,
         totalDiscount,
         grandTotal,
+        calculatedAt,
       ];
 }

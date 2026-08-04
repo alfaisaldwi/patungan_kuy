@@ -90,6 +90,7 @@ class CalculateBillUseCase {
         totalFees: totalFees,
         totalDiscount: totalDiscount,
         grandTotal: grandTotal,
+        calculatedAt: DateTime.now(),
       ),
     );
   }

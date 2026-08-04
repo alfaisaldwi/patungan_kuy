@@ -10,39 +10,42 @@ class AppTheme {
 
   static void setDark(bool value) => _isDark = value;
 
-  static const Color primary = Color(0xFFFF6B6B);
-
-  static const Color primaryDark = Color(0xFFE05555);
-
-  static const Color secondary = Color(0xFF2B3A4A);
-
-  static const Color accent = Color(0xFF4ECDC4);
+  // ── Calm modern palette (biru tua) ───────────────────────────────────────
+  static const Color primary = Color(0xFF1E40AF);
+  static const Color primaryDark = Color(0xFF1E3A8A);
+  static const Color secondary = Color(0xFF0F172A);
+  static const Color accent = Color(0xFF0EA5E9);
 
   static const Color white = Color(0xFFFFFFFF);
   static const Color textOnPrimary = Color(0xFFFFFFFF);
 
-  static const Color success = Color(0xFF40C057);
-  static const Color warning = Color(0xFFFFA94D);
-  static const Color error = Color(0xFFFF6B6B);
+  static const Color success = Color(0xFF10B981);
+  static const Color warning = Color(0xFFF59E0B);
+  static const Color error = Color(0xFFEF4444);
 
-  static Color get primaryLight => _isDark ? const Color(0xFF3E2A2C) : const Color(0xFFFFE5E5);
-  static Color get accentLight => _isDark ? const Color(0xFF1E3634) : const Color(0xFFE0F7F5);
-  static Color get successLight => _isDark ? const Color(0xFF20352A) : const Color(0xFFD3F9D8);
-  static Color get warningLight => _isDark ? const Color(0xFF3B3122) : const Color(0xFFFFF3E0);
-  static Color get errorLight => _isDark ? const Color(0xFF3E2A2C) : const Color(0xFFFFE5E5);
+  static Color get primaryLight => _isDark ? const Color(0xFF172554) : const Color(0xFFDBEAFE);
+  static Color get accentLight => _isDark ? const Color(0xFF0C2D48) : const Color(0xFFE0F2FE);
+  static Color get successLight => _isDark ? const Color(0xFF064E3B) : const Color(0xFFD1FAE5);
+  static Color get warningLight => _isDark ? const Color(0xFF451A03) : const Color(0xFFFFF7ED);
+  static Color get errorLight => _isDark ? const Color(0xFF450A0A) : const Color(0xFFFEF2F2);
 
-  static Color get background => _isDark ? const Color(0xFF121417) : const Color(0xFFF8F9FA);
-  static Color get surface => _isDark ? const Color(0xFF1D2025) : const Color(0xFFFFFFFF);
-  static Color get border => _isDark ? const Color(0xFF2E333A) : const Color(0xFFE9ECEF);
-  static Color get divider => _isDark ? const Color(0xFF272B31) : const Color(0xFFF1F3F5);
+  static Color get background => _isDark ? const Color(0xFF0A0E27) : const Color(0xFFF8FAFC);
+  static Color get surface => _isDark ? const Color(0xFF101530) : const Color(0xFFFFFFFF);
+  static Color get border => _isDark ? const Color(0xFF1E2A5A) : const Color(0xFFE2E8F0);
+  static Color get divider => _isDark ? const Color(0xFF111937) : const Color(0xFFF1F5F9);
 
-  static Color get textPrimary => _isDark ? const Color(0xFFF1F3F5) : const Color(0xFF212529);
-  static Color get textSecondary => _isDark ? const Color(0xFFADB5BD) : const Color(0xFF6C757D);
-  static Color get textHint => _isDark ? const Color(0xFF6C757D) : const Color(0xFFADB5BD);
+  static Color get textPrimary => _isDark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A);
+  static Color get textSecondary => _isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+  static Color get textHint => _isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8);
 
-  static Color get disabled => _isDark ? const Color(0xFF343A40) : const Color(0xFFDEE2E6);
-  static Color get disabledText => _isDark ? const Color(0xFF6C757D) : const Color(0xFFADB5BD);
+  static Color get disabled => _isDark ? const Color(0xFF1E293B) : const Color(0xFFCBD5E1);
+  static Color get disabledText => _isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8);
 
+  // ── Gradients ────────────────────────────────────────────────────────────
+  static List<Color> get primaryGradient => [primary, const Color(0xFF3B82F6)];
+  static List<Color> get accentGradient => [accent, const Color(0xFF38BDF8)];
+
+  // ── Typography ───────────────────────────────────────────────────────────
   static TextStyle get heading1 => TextStyle(
         fontSize: 24,
         fontWeight: FontWeight.w700,
@@ -92,7 +95,6 @@ class AppTheme {
 
     final parts = absValue.toString().split('.');
     final integerPart = parts[0];
-    final decimalPart = parts.length > 1 ? parts[1] : '';
 
     final buffer = StringBuffer();
     for (int i = 0; i < integerPart.length; i++) {
@@ -102,13 +104,7 @@ class AppTheme {
       buffer.write(integerPart[i]);
     }
 
-    var result = buffer.toString();
-    if (decimalPart.isNotEmpty) {
-      final dec = decimalPart.length >= 2 ? decimalPart.substring(0, 2) : decimalPart.padRight(2, '0');
-      result = '$result,$dec';
-    }
-
-    return '${isNegative ? "-" : ""}Rp $result';
+    return '${isNegative ? "-" : ""}Rp $buffer';
   }
 
   static final TextInputFormatter rupiahFormatter = _RupiahInputFormatter();
@@ -133,6 +129,7 @@ class AppTheme {
     return double.tryParse(s) ?? 0.0;
   }
 
+  // ── Spacing ──────────────────────────────────────────────────────────────
   static const double spaceXs = 4;
   static const double spaceSm = 8;
   static const double spaceMd = 12;
@@ -143,30 +140,33 @@ class AppTheme {
   static const double paddingPage = 20;
   static const double paddingCard = 16;
 
+  // ── Radius ───────────────────────────────────────────────────────────────
   static const double radiusSm = 8;
   static const double radiusMd = 12;
   static const double radiusLg = 16;
   static const double radiusXl = 20;
   static const double radiusFull = 999;
 
+  // ── Shadows (soft, elevated) ─────────────────────────────────────────────
   static BoxShadow get shadowSm => BoxShadow(
-        color: Colors.black.withAlpha(_isDark ? 40 : 8),
-        blurRadius: 4,
-        offset: const Offset(0, 1),
-      );
-
-  static BoxShadow get shadowMd => BoxShadow(
-        color: Colors.black.withAlpha(_isDark ? 50 : 10),
-        blurRadius: 8,
+        color: const Color(0xFF0A0E27).withAlpha(_isDark ? 60 : 10),
+        blurRadius: 6,
         offset: const Offset(0, 2),
       );
 
-  static BoxShadow get shadowLg => BoxShadow(
-        color: Colors.black.withAlpha(_isDark ? 60 : 12),
-        blurRadius: 16,
+  static BoxShadow get shadowMd => BoxShadow(
+        color: const Color(0xFF0A0E27).withAlpha(_isDark ? 80 : 15),
+        blurRadius: 12,
         offset: const Offset(0, 4),
       );
 
+  static BoxShadow get shadowLg => BoxShadow(
+        color: const Color(0xFF0A0E27).withAlpha(_isDark ? 100 : 20),
+        blurRadius: 24,
+        offset: const Offset(0, 8),
+      );
+
+  // ── Input decoration ─────────────────────────────────────────────────────
   static InputDecoration inputDecoration({
     required String label,
     String? hint,
@@ -204,6 +204,7 @@ class AppTheme {
     );
   }
 
+  // ── Button styles ────────────────────────────────────────────────────────
   static ButtonStyle get primaryButton => ElevatedButton.styleFrom(
         backgroundColor: primary,
         foregroundColor: textOnPrimary,
@@ -233,10 +234,12 @@ class AppTheme {
         textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
       );
 
+  // ── Card decorations ─────────────────────────────────────────────────────
   static BoxDecoration get cardDecoration => BoxDecoration(
         color: surface,
         borderRadius: BorderRadius.circular(radiusLg),
         boxShadow: [shadowSm],
+        border: Border.all(color: border.withAlpha(128)),
       );
 
   static BoxDecoration get cardElevated => BoxDecoration(

@@ -24,13 +24,13 @@ class CalculatorBloc extends Bloc<CalculatorEvent, CalculatorState> {
   })  : _calculateBillUseCase = calculateBillUseCase,
         _saveBillHistoryUseCase = saveBillHistoryUseCase,
         super(const CalculatorState()) {
-
     on<AddPersonOrder>(_onAddPersonOrder);
     on<UpdatePersonOrder>(_onUpdatePersonOrder);
     on<RemovePersonOrder>(_onRemovePersonOrder);
     on<UpdateFeesAndDiscount>(_onUpdateFeesAndDiscount);
     on<CalculateBillEvent>(_onCalculateBill);
     on<RestoreFromHistory>(_onRestoreFromHistory);
+    on<ResetCalculator>(_onResetCalculator);
   }
 
   void _onAddPersonOrder(AddPersonOrder event, Emitter<CalculatorState> emit) {
@@ -114,6 +114,11 @@ class CalculatorBloc extends Bloc<CalculatorEvent, CalculatorState> {
         status: CalculatorStatus.calculated,
       ),
     );
+  }
+
+  void _onResetCalculator(ResetCalculator event, Emitter<CalculatorState> emit) {
+    _lastSavedSignature = null;
+    emit(const CalculatorState());
   }
 
   Future<void> _autoSaveHistory(BillResult billResult) async {

@@ -66,3 +66,7 @@ class RestoreFromHistory extends CalculatorEvent {
   @override
   List<Object?> get props => [entry];
 }
+
+class ResetCalculator extends CalculatorEvent {
+  const ResetCalculator();
+}

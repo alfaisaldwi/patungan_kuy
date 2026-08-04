@@ -187,7 +187,7 @@ class _AssignmentViewState extends State<_AssignmentView> {
                                       width: 40,
                                       height: 40,
                                       decoration: BoxDecoration(
-                                        gradient: const LinearGradient(colors: [AppTheme.primary, Color(0xFFFF8E8E)]),
+                                        gradient: LinearGradient(colors: AppTheme.primaryGradient),
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                       child: Center(
@@ -222,7 +222,7 @@ class _AssignmentViewState extends State<_AssignmentView> {
                                       ),
                                       child: const Icon(Icons.checklist_rounded, color: AppTheme.accent, size: 18),
                                     ),
-                                    const SizedBox(width: 4),
+                                    const SizedBox(width: 8),
                                     GestureDetector(
                                       onTap: () =>
                                           context.read<ReceiptAssignmentBloc>().add(RemovePerson(personId: person.id)),
@@ -355,7 +355,7 @@ class _AssignmentChecklistSheet extends StatelessWidget {
                       width: 36,
                       height: 36,
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(colors: [AppTheme.primary, Color(0xFFFF8E8E)]),
+                        gradient: LinearGradient(colors: AppTheme.primaryGradient),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Center(
