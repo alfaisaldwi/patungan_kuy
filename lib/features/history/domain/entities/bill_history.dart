@@ -26,13 +26,13 @@ class BillHistory extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        createdAt,
-        orders,
-        taxFee,
-        deliveryFee,
-        discountAmount,
-        isDiscountPercentage,
-        result,
-      ];
+    id,
+    createdAt,
+    orders,
+    taxFee,
+    deliveryFee,
+    discountAmount,
+    isDiscountPercentage,
+    result,
+  ];
 }

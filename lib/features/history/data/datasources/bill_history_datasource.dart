@@ -16,10 +16,15 @@ class BillHistoryDataSource {
   BillHistoryDataSource(this._box);
 
   List<BillHistory> getAll() {
-    final entries = _box.values
-        .map((raw) => BillHistoryModel.fromJson(jsonDecode(raw) as Map<String, dynamic>))
-        .toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    final entries =
+        _box.values
+            .map(
+              (raw) => BillHistoryModel.fromJson(
+                jsonDecode(raw) as Map<String, dynamic>,
+              ),
+            )
+            .toList()
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return entries;
   }
 

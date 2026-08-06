@@ -7,7 +7,11 @@ class ScannerState extends Equatable {
   final ParsedReceipt? parsedReceipt;
   final String? errorMessage;
 
-  const ScannerState({this.status = ScannerStatus.initial, this.parsedReceipt, this.errorMessage});
+  const ScannerState({
+    this.status = ScannerStatus.initial,
+    this.parsedReceipt,
+    this.errorMessage,
+  });
 
   ScannerState copyWith({
     ScannerStatus? status,

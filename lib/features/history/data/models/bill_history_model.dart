@@ -16,11 +16,15 @@ class BillHistoryModel {
       'discountAmount': entry.discountAmount,
       'isDiscountPercentage': entry.isDiscountPercentage,
       'orders': entry.orders
-          .map((o) => {
-                'id': o.id,
-                'name': o.name,
-                'items': o.items.map((i) => {'name': i.name, 'price': i.price}).toList(),
-              })
+          .map(
+            (o) => {
+              'id': o.id,
+              'name': o.name,
+              'items': o.items
+                  .map((i) => {'name': i.name, 'price': i.price})
+                  .toList(),
+            },
+          )
           .toList(),
       'result': {
         'totalBase': entry.result.totalBase,
@@ -28,14 +32,16 @@ class BillHistoryModel {
         'totalDiscount': entry.result.totalDiscount,
         'grandTotal': entry.result.grandTotal,
         'calculatedBills': entry.result.calculatedBills
-            .map((b) => {
-                  'personId': b.personId,
-                  'name': b.name,
-                  'originalPrice': b.originalPrice,
-                  'proportionalFee': b.proportionalFee,
-                  'proportionalDiscount': b.proportionalDiscount,
-                  'finalPayable': b.finalPayable,
-                })
+            .map(
+              (b) => {
+                'personId': b.personId,
+                'name': b.name,
+                'originalPrice': b.originalPrice,
+                'proportionalFee': b.proportionalFee,
+                'proportionalDiscount': b.proportionalDiscount,
+                'finalPayable': b.finalPayable,
+              },
+            )
             .toList(),
       },
     };
@@ -56,7 +62,12 @@ class BillHistoryModel {
               id: o['id'] as String,
               name: o['name'] as String,
               items: (o['items'] as List)
-                  .map((i) => OrderItem(name: i['name'] as String, price: (i['price'] as num).toDouble()))
+                  .map(
+                    (i) => OrderItem(
+                      name: i['name'] as String,
+                      price: (i['price'] as num).toDouble(),
+                    ),
+                  )
                   .toList(),
             ),
           )
@@ -73,7 +84,8 @@ class BillHistoryModel {
                 name: b['name'] as String,
                 originalPrice: (b['originalPrice'] as num).toDouble(),
                 proportionalFee: (b['proportionalFee'] as num).toDouble(),
-                proportionalDiscount: (b['proportionalDiscount'] as num).toDouble(),
+                proportionalDiscount: (b['proportionalDiscount'] as num)
+                    .toDouble(),
                 finalPayable: (b['finalPayable'] as num).toDouble(),
               ),
             )

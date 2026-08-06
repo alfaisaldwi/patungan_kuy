@@ -5,7 +5,8 @@ import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart
 class ReceiptScannerDataSource {
   final TextRecognizer _textRecognizer;
 
-  ReceiptScannerDataSource() : _textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
+  ReceiptScannerDataSource()
+    : _textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
 
   Future<RecognizedText> recognizeText(String imagePath) async {
     final file = File(imagePath);

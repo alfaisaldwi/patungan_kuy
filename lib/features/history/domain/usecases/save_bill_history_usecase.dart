@@ -9,5 +9,6 @@ class SaveBillHistoryUseCase {
 
   SaveBillHistoryUseCase(this.repository);
 
-  Future<Either<Failure, void>> call(BillHistory entry) => repository.save(entry);
+  Future<Either<Failure, void>> call(BillHistory entry) =>
+      repository.save(entry);
 }

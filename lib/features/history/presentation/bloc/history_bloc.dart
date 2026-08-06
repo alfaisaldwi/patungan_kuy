@@ -18,28 +18,45 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
     required GetBillHistoryUseCase getBillHistoryUseCase,
     required DeleteBillHistoryUseCase deleteBillHistoryUseCase,
     required ClearBillHistoryUseCase clearBillHistoryUseCase,
-  })  : _getBillHistoryUseCase = getBillHistoryUseCase,
-        _deleteBillHistoryUseCase = deleteBillHistoryUseCase,
-        _clearBillHistoryUseCase = clearBillHistoryUseCase,
-        super(const HistoryState()) {
+  }) : _getBillHistoryUseCase = getBillHistoryUseCase,
+       _deleteBillHistoryUseCase = deleteBillHistoryUseCase,
+       _clearBillHistoryUseCase = clearBillHistoryUseCase,
+       super(const HistoryState()) {
     on<LoadHistory>(_onLoadHistory);
     on<DeleteHistoryEntry>(_onDeleteHistoryEntry);
     on<ClearHistory>(_onClearHistory);
   }
 
-  Future<void> _onLoadHistory(LoadHistory event, Emitter<HistoryState> emit) async {
+  Future<void> _onLoadHistory(
+    LoadHistory event,
+    Emitter<HistoryState> emit,
+  ) async {
     emit(state.copyWith(status: HistoryStatus.loading));
     final result = await _getBillHistoryUseCase();
     result.fold(
-      (failure) => emit(state.copyWith(status: HistoryStatus.error, errorMessage: failure.message)),
-      (entries) => emit(state.copyWith(status: HistoryStatus.loaded, entries: entries)),
+      (failure) => emit(
+        state.copyWith(
+          status: HistoryStatus.error,
+          errorMessage: failure.message,
+        ),
+      ),
+      (entries) =>
+          emit(state.copyWith(status: HistoryStatus.loaded, entries: entries)),
     );
   }
 
-  Future<void> _onDeleteHistoryEntry(DeleteHistoryEntry event, Emitter<HistoryState> emit) async {
+  Future<void> _onDeleteHistoryEntry(
+    DeleteHistoryEntry event,
+    Emitter<HistoryState> emit,
+  ) async {
     final result = await _deleteBillHistoryUseCase(event.id);
     result.fold(
-      (failure) => emit(state.copyWith(status: HistoryStatus.error, errorMessage: failure.message)),
+      (failure) => emit(
+        state.copyWith(
+          status: HistoryStatus.error,
+          errorMessage: failure.message,
+        ),
+      ),
       (_) => emit(
         state.copyWith(
           status: HistoryStatus.loaded,
@@ -49,11 +66,20 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
     );
   }
 
-  Future<void> _onClearHistory(ClearHistory event, Emitter<HistoryState> emit) async {
+  Future<void> _onClearHistory(
+    ClearHistory event,
+    Emitter<HistoryState> emit,
+  ) async {
     final result = await _clearBillHistoryUseCase();
     result.fold(
-      (failure) => emit(state.copyWith(status: HistoryStatus.error, errorMessage: failure.message)),
-      (_) => emit(state.copyWith(status: HistoryStatus.loaded, entries: const [])),
+      (failure) => emit(
+        state.copyWith(
+          status: HistoryStatus.error,
+          errorMessage: failure.message,
+        ),
+      ),
+      (_) =>
+          emit(state.copyWith(status: HistoryStatus.loaded, entries: const [])),
     );
   }
 }

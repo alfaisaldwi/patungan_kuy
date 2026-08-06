@@ -8,28 +8,28 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 class ReceiptImageGenerator {
-
   static Future<bool> captureAndShare({
     required BuildContext context,
     required GlobalKey repaintKey,
     String fileName = 'PatunganKuy_Receipt',
   }) async {
     try {
-
-      final boundary = repaintKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      final boundary =
+          repaintKey.currentContext?.findRenderObject()
+              as RenderRepaintBoundary?;
 
       if (boundary == null) {
-        _showSnackBar(context, 'Failed to capture receipt: widget not found.');
+        _showSnackBar(context, 'Gagal membuat gambar struk.');
         return false;
       }
 
-      final ui.Image image = await boundary.toImage(
-        pixelRatio: 3.0,
-      );
+      final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
 
-      final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      final ByteData? byteData = await image.toByteData(
+        format: ui.ImageByteFormat.png,
+      );
       if (byteData == null) {
-        _showSnackBar(context, 'Failed to encode receipt image.');
+        _showSnackBar(context, 'Gagal memproses gambar struk.');
         return false;
       }
 
@@ -40,18 +40,24 @@ class ReceiptImageGenerator {
       final File file = File(filePath);
       await file.writeAsBytes(pngBytes);
 
-      await Share.shareXFiles([XFile(filePath, mimeType: 'image/png')], text: 'PatunganKuy Bill Receipt');
+      await Share.shareXFiles([
+        XFile(filePath, mimeType: 'image/png'),
+      ], text: 'Struk patungan dari PatunganKuy');
 
       return true;
     } catch (e) {
-      _showSnackBar(context, 'Error sharing receipt: $e');
+      _showSnackBar(context, 'Gagal membagikan struk: $e');
       return false;
     }
   }
 
   static void _showSnackBar(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), duration: const Duration(seconds: 3), behavior: SnackBarBehavior.floating),
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 3),
+        behavior: SnackBarBehavior.floating,
+      ),
     );
   }
 }

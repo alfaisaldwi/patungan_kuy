@@ -27,7 +27,10 @@ class PatunganKuyApp extends StatelessWidget {
           // Re-inflate the whole tree on toggle so widgets reading AppTheme
           // getters pick up the new palette. Bloc state survives because the
           // blocs are app-lifetime singletons provided via BlocProvider.value.
-          home: KeyedSubtree(key: ValueKey(isDark), child: const CalculatorPage()),
+          home: KeyedSubtree(
+            key: ValueKey(isDark),
+            child: const CalculatorPage(),
+          ),
         );
       },
     );
@@ -58,13 +61,18 @@ class PatunganKuyApp extends StatelessWidget {
       cardTheme: CardThemeData(
         color: AppTheme.surface,
         elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusLg)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+        ),
         margin: const EdgeInsets.symmetric(vertical: AppTheme.spaceSm),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppTheme.background,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppTheme.radiusMd),
           borderSide: BorderSide(color: AppTheme.border),
@@ -84,16 +92,24 @@ class PatunganKuyApp extends StatelessWidget {
         labelStyle: AppTheme.bodySmall.copyWith(color: AppTheme.textSecondary),
         hintStyle: TextStyle(color: AppTheme.textHint, fontSize: 14),
       ),
-      elevatedButtonTheme: ElevatedButtonThemeData(style: AppTheme.primaryButton),
-      outlinedButtonTheme: OutlinedButtonThemeData(style: AppTheme.outlinedButton),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: AppTheme.primaryButton,
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: AppTheme.outlinedButton,
+      ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusMd)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+        ),
       ),
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: AppTheme.surface,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(AppTheme.radiusXl)),
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppTheme.radiusXl),
+          ),
         ),
       ),
     );

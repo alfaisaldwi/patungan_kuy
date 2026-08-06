@@ -15,7 +15,7 @@ class BillHistoryRepositoryImpl implements BillHistoryRepository {
     try {
       return Right(_dataSource.getAll());
     } catch (e) {
-      return Left(HistoryFailure('Failed to load history: $e'));
+      return Left(HistoryFailure('Gagal memuat riwayat: $e'));
     }
   }
 
@@ -25,7 +25,7 @@ class BillHistoryRepositoryImpl implements BillHistoryRepository {
       await _dataSource.save(entry);
       return const Right(null);
     } catch (e) {
-      return Left(HistoryFailure('Failed to save history: $e'));
+      return Left(HistoryFailure('Gagal menyimpan riwayat: $e'));
     }
   }
 
@@ -35,7 +35,7 @@ class BillHistoryRepositoryImpl implements BillHistoryRepository {
       await _dataSource.delete(id);
       return const Right(null);
     } catch (e) {
-      return Left(HistoryFailure('Failed to delete history entry: $e'));
+      return Left(HistoryFailure('Gagal menghapus riwayat: $e'));
     }
   }
 
@@ -45,7 +45,7 @@ class BillHistoryRepositoryImpl implements BillHistoryRepository {
       await _dataSource.clear();
       return const Right(null);
     } catch (e) {
-      return Left(HistoryFailure('Failed to clear history: $e'));
+      return Left(HistoryFailure('Gagal menghapus semua riwayat: $e'));
     }
   }
 }

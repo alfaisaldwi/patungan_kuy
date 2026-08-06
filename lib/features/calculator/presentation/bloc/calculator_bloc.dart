@@ -21,9 +21,9 @@ class CalculatorBloc extends Bloc<CalculatorEvent, CalculatorState> {
   CalculatorBloc({
     required CalculateBillUseCase calculateBillUseCase,
     required SaveBillHistoryUseCase saveBillHistoryUseCase,
-  })  : _calculateBillUseCase = calculateBillUseCase,
-        _saveBillHistoryUseCase = saveBillHistoryUseCase,
-        super(const CalculatorState()) {
+  }) : _calculateBillUseCase = calculateBillUseCase,
+       _saveBillHistoryUseCase = saveBillHistoryUseCase,
+       super(const CalculatorState()) {
     on<AddPersonOrder>(_onAddPersonOrder);
     on<UpdatePersonOrder>(_onUpdatePersonOrder);
     on<RemovePersonOrder>(_onRemovePersonOrder);
@@ -34,7 +34,11 @@ class CalculatorBloc extends Bloc<CalculatorEvent, CalculatorState> {
   }
 
   void _onAddPersonOrder(AddPersonOrder event, Emitter<CalculatorState> emit) {
-    final newOrder = PersonOrder(id: _generateId(), name: event.name, items: event.items);
+    final newOrder = PersonOrder(
+      id: _generateId(),
+      name: event.name,
+      items: event.items,
+    );
     emit(
       state.copyWith(
         orders: [...state.orders, newOrder],
@@ -45,22 +49,47 @@ class CalculatorBloc extends Bloc<CalculatorEvent, CalculatorState> {
     );
   }
 
-  void _onUpdatePersonOrder(UpdatePersonOrder event, Emitter<CalculatorState> emit) {
+  void _onUpdatePersonOrder(
+    UpdatePersonOrder event,
+    Emitter<CalculatorState> emit,
+  ) {
     final updatedOrders = state.orders.map((order) {
       if (order.id == event.id) {
         return PersonOrder(id: order.id, name: event.name, items: event.items);
       }
       return order;
     }).toList();
-    emit(state.copyWith(orders: updatedOrders, status: CalculatorStatus.initial, clearResult: true, clearError: true));
+    emit(
+      state.copyWith(
+        orders: updatedOrders,
+        status: CalculatorStatus.initial,
+        clearResult: true,
+        clearError: true,
+      ),
+    );
   }
 
-  void _onRemovePersonOrder(RemovePersonOrder event, Emitter<CalculatorState> emit) {
-    final filteredOrders = state.orders.where((order) => order.id != event.id).toList();
-    emit(state.copyWith(orders: filteredOrders, status: CalculatorStatus.initial, clearResult: true, clearError: true));
+  void _onRemovePersonOrder(
+    RemovePersonOrder event,
+    Emitter<CalculatorState> emit,
+  ) {
+    final filteredOrders = state.orders
+        .where((order) => order.id != event.id)
+        .toList();
+    emit(
+      state.copyWith(
+        orders: filteredOrders,
+        status: CalculatorStatus.initial,
+        clearResult: true,
+        clearError: true,
+      ),
+    );
   }
 
-  void _onUpdateFeesAndDiscount(UpdateFeesAndDiscount event, Emitter<CalculatorState> emit) {
+  void _onUpdateFeesAndDiscount(
+    UpdateFeesAndDiscount event,
+    Emitter<CalculatorState> emit,
+  ) {
     emit(
       state.copyWith(
         taxFee: event.taxFee,
@@ -74,7 +103,10 @@ class CalculatorBloc extends Bloc<CalculatorEvent, CalculatorState> {
     );
   }
 
-  Future<void> _onCalculateBill(CalculateBillEvent event, Emitter<CalculatorState> emit) async {
+  Future<void> _onCalculateBill(
+    CalculateBillEvent event,
+    Emitter<CalculatorState> emit,
+  ) async {
     final params = CalculateBillParams(
       orders: state.orders,
       taxFee: state.taxFee,
@@ -86,9 +118,20 @@ class CalculatorBloc extends Bloc<CalculatorEvent, CalculatorState> {
     final result = _calculateBillUseCase(params);
 
     result.fold(
-      (failure) =>
-          emit(state.copyWith(status: CalculatorStatus.error, errorMessage: failure.message, clearResult: true)),
-      (billResult) => emit(state.copyWith(result: billResult, status: CalculatorStatus.calculated, clearError: true)),
+      (failure) => emit(
+        state.copyWith(
+          status: CalculatorStatus.error,
+          errorMessage: failure.message,
+          clearResult: true,
+        ),
+      ),
+      (billResult) => emit(
+        state.copyWith(
+          result: billResult,
+          status: CalculatorStatus.calculated,
+          clearError: true,
+        ),
+      ),
     );
 
     final billResult = result.toOption().toNullable();
@@ -97,12 +140,20 @@ class CalculatorBloc extends Bloc<CalculatorEvent, CalculatorState> {
     }
   }
 
-  void _onRestoreFromHistory(RestoreFromHistory event, Emitter<CalculatorState> emit) {
+  void _onRestoreFromHistory(
+    RestoreFromHistory event,
+    Emitter<CalculatorState> emit,
+  ) {
     final entry = event.entry;
     // Mark as already saved so recalculating the restored bill unchanged
     // does not create a duplicate history entry.
-    _lastSavedSignature = _signature(entry.orders, entry.taxFee, entry.deliveryFee, entry.discountAmount,
-        entry.isDiscountPercentage);
+    _lastSavedSignature = _signature(
+      entry.orders,
+      entry.taxFee,
+      entry.deliveryFee,
+      entry.discountAmount,
+      entry.isDiscountPercentage,
+    );
     emit(
       CalculatorState(
         orders: entry.orders,
@@ -116,14 +167,22 @@ class CalculatorBloc extends Bloc<CalculatorEvent, CalculatorState> {
     );
   }
 
-  void _onResetCalculator(ResetCalculator event, Emitter<CalculatorState> emit) {
+  void _onResetCalculator(
+    ResetCalculator event,
+    Emitter<CalculatorState> emit,
+  ) {
     _lastSavedSignature = null;
     emit(const CalculatorState());
   }
 
   Future<void> _autoSaveHistory(BillResult billResult) async {
-    final signature =
-        _signature(state.orders, state.taxFee, state.deliveryFee, state.discountAmount, state.isDiscountPercentage);
+    final signature = _signature(
+      state.orders,
+      state.taxFee,
+      state.deliveryFee,
+      state.discountAmount,
+      state.isDiscountPercentage,
+    );
     if (signature == _lastSavedSignature) return;
 
     final now = DateTime.now();
@@ -143,13 +202,22 @@ class CalculatorBloc extends Bloc<CalculatorEvent, CalculatorState> {
     saved.fold((_) {}, (_) => _lastSavedSignature = signature);
   }
 
-  String _signature(List<PersonOrder> orders, double taxFee, double deliveryFee, double discountAmount,
-      bool isDiscountPercentage) {
+  String _signature(
+    List<PersonOrder> orders,
+    double taxFee,
+    double deliveryFee,
+    double discountAmount,
+    bool isDiscountPercentage,
+  ) {
     final ordersPart = orders
-        .map((o) => '${o.name}:${o.items.map((i) => '${i.name}=${i.price}').join(',')}')
+        .map(
+          (o) =>
+              '${o.name}:${o.items.map((i) => '${i.name}=${i.price}').join(',')}',
+        )
         .join('|');
     return '$ordersPart#$taxFee#$deliveryFee#$discountAmount#$isDiscountPercentage';
   }
 
-  String _generateId() => '${DateTime.now().microsecondsSinceEpoch}_${state.orders.length}';
+  String _generateId() =>
+      '${DateTime.now().microsecondsSinceEpoch}_${state.orders.length}';
 }
