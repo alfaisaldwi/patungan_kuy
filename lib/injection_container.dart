@@ -63,8 +63,6 @@ Future<void> initDependencies() async {
     () => ClearBillHistoryUseCase(sl<BillHistoryRepository>()),
   );
 
-  // App-lifetime singletons so bloc state survives full re-inflation of the
-  // widget tree (e.g. when the theme mode is toggled).
   sl.registerLazySingleton<CalculatorBloc>(
     () => CalculatorBloc(
       calculateBillUseCase: sl<CalculateBillUseCase>(),
@@ -76,7 +74,6 @@ Future<void> initDependencies() async {
         ScannerBloc(extractReceiptDataUseCase: sl<ExtractReceiptDataUseCase>()),
   );
 
-  // Page-scoped: HistoryPage creates and closes its own instance.
   sl.registerFactory<HistoryBloc>(
     () => HistoryBloc(
       getBillHistoryUseCase: sl<GetBillHistoryUseCase>(),
@@ -90,8 +87,6 @@ Future<Box<String>> _openHistoryBox() async {
   try {
     await Hive.initFlutter();
   } catch (_) {
-    // path_provider is unavailable in unit/widget tests; fall back to a
-    // temporary directory so Hive still works.
     Hive.init(Directory.systemTemp.createTempSync('patungan_kuy_hive').path);
   }
   return Hive.openBox<String>(BillHistoryDataSource.boxName);

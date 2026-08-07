@@ -6,22 +6,22 @@ import '../../../../injection_container.dart';
 import '../../domain/entities/bill_history.dart';
 import '../bloc/history_bloc.dart';
 
-/// Shows saved bills, newest first. Pops with a [BillHistory] when the user
-/// chooses to load an entry back into the calculator.
 class HistoryPage extends StatelessWidget {
-  const HistoryPage({super.key});
+  final void Function(BillHistory entry)? onLoadToCalculator;
+  const HistoryPage({super.key, this.onLoadToCalculator});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider<HistoryBloc>(
       create: (_) => sl<HistoryBloc>()..add(const LoadHistory()),
-      child: const _HistoryView(),
+      child: _HistoryView(onLoadToCalculator: onLoadToCalculator),
     );
   }
 }
 
 class _HistoryView extends StatelessWidget {
-  const _HistoryView();
+  final void Function(BillHistory entry)? onLoadToCalculator;
+  const _HistoryView({this.onLoadToCalculator});
 
   @override
   Widget build(BuildContext context) {
@@ -70,8 +70,10 @@ class _HistoryView extends StatelessWidget {
                 vertical: AppTheme.spaceLg,
               ),
               itemCount: state.entries.length,
-              itemBuilder: (context, index) =>
-                  _HistoryCard(entry: state.entries[index]),
+              itemBuilder: (context, index) => _HistoryCard(
+                entry: state.entries[index],
+                onLoadToCalculator: onLoadToCalculator,
+              ),
             );
           },
         ),
@@ -86,7 +88,7 @@ class _HistoryView extends StatelessWidget {
       builder: (dialogContext) => AlertDialog(
         title: Text('Hapus semua riwayat?', style: AppTheme.heading3),
         content: Text(
-          'Semua tagihan tersimpan bakal dihapus permanen.',
+          'Semua tagihan tersimpan akan dihapus permanen.',
           style: AppTheme.body,
         ),
         actions: [
@@ -132,7 +134,7 @@ class _EmptyState extends StatelessWidget {
           Text('Belum ada tagihan tersimpan', style: AppTheme.heading3),
           const SizedBox(height: AppTheme.spaceXs),
           Text(
-            'Tagihan yang udah dihitung bakal otomatis kesimpan di sini',
+            'Tagihan yang udah dihitung akan otomatis kesimpan di sini',
             style: AppTheme.bodySmall,
           ),
         ],
@@ -143,8 +145,9 @@ class _EmptyState extends StatelessWidget {
 
 class _HistoryCard extends StatelessWidget {
   final BillHistory entry;
+  final void Function(BillHistory entry)? onLoadToCalculator;
 
-  const _HistoryCard({required this.entry});
+  const _HistoryCard({required this.entry, this.onLoadToCalculator});
 
   @override
   Widget build(BuildContext context) {
@@ -237,7 +240,10 @@ class _HistoryCard extends StatelessWidget {
           top: Radius.circular(AppTheme.radiusXl),
         ),
       ),
-      builder: (_) => _HistoryDetailSheet(entry: entry),
+      builder: (_) => _HistoryDetailSheet(
+        entry: entry,
+        onLoadToCalculator: onLoadToCalculator,
+      ),
     );
   }
 
@@ -248,7 +254,7 @@ class _HistoryCard extends StatelessWidget {
       builder: (dialogContext) => AlertDialog(
         title: Text('Hapus tagihan ini?', style: AppTheme.heading3),
         content: Text(
-          'Tagihan ini bakal dihapus permanen.',
+          'Tagihan ini akan dihapus permanen.',
           style: AppTheme.body,
         ),
         actions: [
@@ -289,8 +295,9 @@ class _HistoryCard extends StatelessWidget {
 
 class _HistoryDetailSheet extends StatelessWidget {
   final BillHistory entry;
+  final void Function(BillHistory entry)? onLoadToCalculator;
 
-  const _HistoryDetailSheet({required this.entry});
+  const _HistoryDetailSheet({required this.entry, this.onLoadToCalculator});
 
   @override
   Widget build(BuildContext context) {
@@ -405,10 +412,14 @@ class _HistoryDetailSheet extends StatelessWidget {
                 icon: const Icon(Icons.restore, size: 20),
                 label: const Text('Muat ke Kalkulator'),
                 onPressed: () {
-                  // Close the sheet, then pop HistoryPage returning the entry.
                   final navigator = Navigator.of(context);
                   navigator.pop();
-                  navigator.pop(entry);
+                  final callback = onLoadToCalculator;
+                  if (callback != null) {
+                    callback(entry);
+                  } else {
+                    navigator.pop(entry);
+                  }
                 },
               ),
             ),

@@ -24,6 +24,8 @@ dependencies:
   shared_preferences: ^2.3.2
   hive: ^2.2.3
   hive_flutter: ^1.1.0
+  carousel_slider: ^5.1.2
+  persistent_bottom_nav_bar_v2: ^6.3.2
 
 dev_dependencies:
   flutter_test:

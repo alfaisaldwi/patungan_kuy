@@ -52,8 +52,6 @@ class _AssignmentViewState extends State<_AssignmentView> {
     _nameController.clear();
   }
 
-  /// Langsung hapus kalau orangnya belum ikut item apa pun; kalau sudah,
-  /// minta konfirmasi karena item yang ia ikuti bakal balik jadi belum kebagi.
   void _confirmRemovePerson(
     BuildContext context,
     Person person,
@@ -69,7 +67,7 @@ class _AssignmentViewState extends State<_AssignmentView> {
       builder: (dialogContext) => AlertDialog(
         title: Text('Hapus ${person.name}?', style: AppTheme.heading3),
         content: Text(
-          '$assignedCount item yang dia ikuti bakal balik jadi belum kebagi.',
+          '$assignedCount item yang dia ikuti akan balik jadi belum kebagi.',
           style: AppTheme.body,
         ),
         actions: [
@@ -949,11 +947,13 @@ class _AssignmentChecklistSheet extends StatelessWidget {
                             .map((p) => p.name)
                             .toList();
 
+                        final takenByOthers = !isMine && otherNames.isNotEmpty;
+
                         final String subtitle;
                         if (isMine && item.isShared) {
                           subtitle =
                               '${AppTheme.formatRupiah(item.sharePrice)}/orang  •  bareng ${otherNames.join(', ')}';
-                        } else if (!isMine && otherNames.isNotEmpty) {
+                        } else if (takenByOthers) {
                           subtitle =
                               '${AppTheme.formatRupiah(item.price)}  •  Punya ${otherNames.join(', ')} — ketuk buat ikut patungan';
                         } else {
@@ -968,6 +968,8 @@ class _AssignmentChecklistSheet extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: isMine
                                 ? AppTheme.primaryLight
+                                : takenByOthers
+                                ? AppTheme.warningLight
                                 : AppTheme.surface,
                             borderRadius: BorderRadius.circular(
                               AppTheme.radiusMd,
@@ -975,26 +977,34 @@ class _AssignmentChecklistSheet extends StatelessWidget {
                             border: Border.all(
                               color: isMine
                                   ? AppTheme.primary.withAlpha(77)
+                                  : takenByOthers
+                                  ? AppTheme.warning.withAlpha(77)
                                   : AppTheme.border.withAlpha(128),
                             ),
                           ),
-                          child: CheckboxListTile(
-                            value: isMine,
-                            onChanged: (_) =>
-                                context.read<ReceiptAssignmentBloc>().add(
-                                  ToggleItemAssignment(
-                                    itemId: item.id,
-                                    personId: person.id,
+                          child: Material(
+                            type: MaterialType.transparency,
+                            child: CheckboxListTile(
+                              value: isMine,
+                              onChanged: (_) =>
+                                  context.read<ReceiptAssignmentBloc>().add(
+                                    ToggleItemAssignment(
+                                      itemId: item.id,
+                                      personId: person.id,
+                                    ),
                                   ),
+                              title: Text(item.name, style: AppTheme.body),
+                              subtitle: Text(
+                                subtitle,
+                                style: AppTheme.bodySmall,
+                              ),
+                              activeColor: AppTheme.primary,
+                              controlAffinity: ListTileControlAffinity.leading,
+                              dense: true,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                  AppTheme.radiusMd,
                                 ),
-                            title: Text(item.name, style: AppTheme.body),
-                            subtitle: Text(subtitle, style: AppTheme.bodySmall),
-                            activeColor: AppTheme.primary,
-                            controlAffinity: ListTileControlAffinity.leading,
-                            dense: true,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                AppTheme.radiusMd,
                               ),
                             ),
                           ),

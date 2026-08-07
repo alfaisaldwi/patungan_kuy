@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_controller.dart';
-import 'features/calculator/presentation/pages/calculator_page.dart';
+import 'features/start/presentation/pages/start_page.dart';
 import 'injection_container.dart';
 
 void main() async {
@@ -24,13 +24,7 @@ class PatunganKuyApp extends StatelessWidget {
           title: 'PatunganKuy',
           debugShowCheckedModeBanner: false,
           theme: _buildTheme(isDark),
-          // Re-inflate the whole tree on toggle so widgets reading AppTheme
-          // getters pick up the new palette. Bloc state survives because the
-          // blocs are app-lifetime singletons provided via BlocProvider.value.
-          home: KeyedSubtree(
-            key: ValueKey(isDark),
-            child: const CalculatorPage(),
-          ),
+          home: KeyedSubtree(key: ValueKey(isDark), child: const StartPage()),
         );
       },
     );

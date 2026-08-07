@@ -10,9 +10,9 @@ class AppTheme {
 
   static void setDark(bool value) => _isDark = value;
 
-  // ── Calm modern palette (biru tua) ───────────────────────────────────────
-  static const Color primary = Color(0xFF1E40AF);
-  static const Color primaryDark = Color(0xFF1E3A8A);
+  // ── Soft modern palette (indigo lembut) ──────────────────────────────────
+  static const Color primary = Color(0xFF6366F1);
+  static const Color primaryDark = Color(0xFF4F46E5);
   static const Color secondary = Color(0xFF0F172A);
   static const Color accent = Color(0xFF0EA5E9);
 
@@ -24,7 +24,7 @@ class AppTheme {
   static const Color error = Color(0xFFEF4444);
 
   static Color get primaryLight =>
-      _isDark ? const Color(0xFF172554) : const Color(0xFFDBEAFE);
+      _isDark ? const Color(0xFF1E1B4B) : const Color(0xFFEEF0FE);
   static Color get accentLight =>
       _isDark ? const Color(0xFF0C2D48) : const Color(0xFFE0F2FE);
   static Color get successLight =>
@@ -35,13 +35,13 @@ class AppTheme {
       _isDark ? const Color(0xFF450A0A) : const Color(0xFFFEF2F2);
 
   static Color get background =>
-      _isDark ? const Color(0xFF0A0E27) : const Color(0xFFF8FAFC);
+      _isDark ? const Color(0xFF0E1023) : const Color(0xFFF6F7FB);
   static Color get surface =>
-      _isDark ? const Color(0xFF101530) : const Color(0xFFFFFFFF);
+      _isDark ? const Color(0xFF15182F) : const Color(0xFFFFFFFF);
   static Color get border =>
-      _isDark ? const Color(0xFF1E2A5A) : const Color(0xFFE2E8F0);
+      _isDark ? const Color(0xFF252A4D) : const Color(0xFFE8EAF3);
   static Color get divider =>
-      _isDark ? const Color(0xFF111937) : const Color(0xFFF1F5F9);
+      _isDark ? const Color(0xFF191D38) : const Color(0xFFEFF1F7);
 
   static Color get textPrimary =>
       _isDark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A);
@@ -56,7 +56,7 @@ class AppTheme {
       _isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8);
 
   // ── Gradients ────────────────────────────────────────────────────────────
-  static List<Color> get primaryGradient => [primary, const Color(0xFF3B82F6)];
+  static List<Color> get primaryGradient => [primary, const Color(0xFF8B5CF6)];
   static List<Color> get accentGradient => [accent, const Color(0xFF38BDF8)];
 
   // ── Typography ───────────────────────────────────────────────────────────
