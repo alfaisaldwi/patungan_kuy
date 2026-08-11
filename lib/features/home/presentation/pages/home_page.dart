@@ -12,10 +12,9 @@ import '../../../scanner/presentation/bloc/scanner_bloc.dart';
 import '../widgets/floating_nav_bar.dart';
 
 class HomePage extends StatefulWidget {
-  final CalculatorStartAction? startAction;
   final int initialTab;
 
-  const HomePage({super.key, this.startAction, this.initialTab = 0});
+  const HomePage({super.key, this.initialTab = 0});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -84,7 +83,7 @@ class _HomePageState extends State<HomePage> {
         controller: _controller,
         tabs: [
           PersistentTabConfig(
-            screen: CalculatorPage(startAction: widget.startAction),
+            screen: const CalculatorPage(),
             item: ItemConfig(
               icon: const Icon(Icons.home_rounded),
               title: 'Beranda',

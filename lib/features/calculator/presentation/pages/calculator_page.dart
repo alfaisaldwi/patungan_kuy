@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/theme_controller.dart';
 import '../../../../injection_container.dart';
 import '../../../assignment/presentation/models/assignment_result.dart';
 import '../../../assignment/presentation/pages/assignment_page.dart';
@@ -9,14 +10,10 @@ import '../../../scanner/presentation/bloc/scanner_bloc.dart';
 import '../bloc/calculator_bloc.dart';
 import '../widgets/add_person_form.dart';
 import '../widgets/order_list.dart';
-import '../widgets/scan_picker.dart';
 import 'summary_page.dart';
 
-enum CalculatorStartAction { scan, manual }
-
 class CalculatorPage extends StatelessWidget {
-  final CalculatorStartAction? startAction;
-  const CalculatorPage({super.key, this.startAction});
+  const CalculatorPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -25,14 +22,13 @@ class CalculatorPage extends StatelessWidget {
         BlocProvider<CalculatorBloc>.value(value: sl<CalculatorBloc>()),
         BlocProvider<ScannerBloc>.value(value: sl<ScannerBloc>()),
       ],
-      child: _CalculatorView(startAction: startAction),
+      child: const _CalculatorView(),
     );
   }
 }
 
 class _CalculatorView extends StatefulWidget {
-  final CalculatorStartAction? startAction;
-  const _CalculatorView({this.startAction});
+  const _CalculatorView();
 
   @override
   State<_CalculatorView> createState() => _CalculatorViewState();
@@ -42,22 +38,6 @@ class _CalculatorViewState extends State<_CalculatorView> {
   final _addPersonFormKey = GlobalKey<AddPersonFormState>();
 
   void _expandAddPersonForm() => _addPersonFormKey.currentState?.expand();
-
-  @override
-  void initState() {
-    super.initState();
-    final action = widget.startAction;
-    if (action == null) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      switch (action) {
-        case CalculatorStartAction.scan:
-          showScanPicker(context);
-        case CalculatorStartAction.manual:
-          _expandAddPersonForm();
-      }
-    });
-  }
 
   void _confirmReset() {
     final state = context.read<CalculatorBloc>().state;
@@ -73,10 +53,7 @@ class _CalculatorViewState extends State<_CalculatorView> {
           style: AppTheme.body,
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Batal'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Batal')),
           TextButton(
             onPressed: () {
               Navigator.pop(ctx, true);
@@ -90,10 +67,7 @@ class _CalculatorViewState extends State<_CalculatorView> {
   }
 
   void _openSummary() {
-    Navigator.of(
-      context,
-      rootNavigator: true,
-    ).push(MaterialPageRoute(builder: (_) => const SummaryPage()));
+    Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(builder: (_) => const SummaryPage()));
   }
 
   @override
@@ -103,31 +77,38 @@ class _CalculatorViewState extends State<_CalculatorView> {
       child: Scaffold(
         body: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppTheme.paddingPage,
-              vertical: AppTheme.spaceLg,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _CalculatorHeader(onReset: _confirmReset),
-                const SizedBox(height: AppTheme.space2xl),
-                _SectionHeader(
-                  icon: Icons.groups_rounded,
-                  iconBg: AppTheme.primaryLight,
-                  iconColor: AppTheme.primary,
-                  title: 'Pesanan',
-                  subtitle: 'Siapa aja yang ikut patungan',
-                  trailing: const OrdersCountBadge(),
-                ),
-                const SizedBox(height: AppTheme.spaceLg),
-                OrderList(onAddManually: _expandAddPersonForm),
-                const SizedBox(height: AppTheme.spaceMd),
-                AddPersonForm(key: _addPersonFormKey),
-                const SizedBox(height: AppTheme.space2xl),
-                _ContinueButton(onTap: _openSummary),
-                const SizedBox(height: AppTheme.space2xl),
-              ],
+            padding: const EdgeInsets.symmetric(horizontal: AppTheme.paddingPage, vertical: AppTheme.spaceLg),
+            child: BlocBuilder<CalculatorBloc, CalculatorState>(
+              buildWhen: (prev, curr) => prev.orders.isEmpty != curr.orders.isEmpty,
+              builder: (context, state) {
+                final hasOrders = state.orders.isNotEmpty;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _CalculatorHeader(onReset: _confirmReset),
+                    const SizedBox(height: AppTheme.space2xl),
+                    if (hasOrders) ...[
+                      _SectionHeader(
+                        icon: Icons.groups_rounded,
+                        iconBg: AppTheme.primaryLight,
+                        iconColor: AppTheme.primary,
+                        title: 'Pesanan',
+                        subtitle: 'Siapa aja yang ikut patungan',
+                        trailing: const OrdersCountBadge(),
+                      ),
+                      const SizedBox(height: AppTheme.spaceLg),
+                    ],
+                    OrderList(onAddManually: _expandAddPersonForm),
+                    const SizedBox(height: AppTheme.spaceMd),
+                    if (hasOrders) ...[
+                      AddPersonForm(key: _addPersonFormKey),
+                      const SizedBox(height: AppTheme.space2xl),
+                      _ContinueButton(onTap: _openSummary),
+                    ],
+                    const SizedBox(height: AppTheme.space2xl),
+                  ],
+                );
+              },
             ),
           ),
         ),
@@ -137,13 +118,8 @@ class _CalculatorViewState extends State<_CalculatorView> {
 
   void _onScannerStateChanged(BuildContext context, ScannerState state) {
     if (state.status == ScannerStatus.success && state.parsedReceipt != null) {
-
       Navigator.of(context, rootNavigator: true)
-          .push<AssignmentResult>(
-            MaterialPageRoute(
-              builder: (_) => AssignmentPage(receipt: state.parsedReceipt!),
-            ),
-          )
+          .push<AssignmentResult>(MaterialPageRoute(builder: (_) => AssignmentPage(receipt: state.parsedReceipt!)))
           .then((result) {
             if (result != null && mounted) {
               _applyAssignmentResult(context, result);
@@ -151,12 +127,9 @@ class _CalculatorViewState extends State<_CalculatorView> {
           });
     }
     if (state.status == ScannerStatus.error && state.errorMessage != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(state.errorMessage!),
-          backgroundColor: AppTheme.error,
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(state.errorMessage!), backgroundColor: AppTheme.error));
     }
   }
 
@@ -165,9 +138,7 @@ class _CalculatorViewState extends State<_CalculatorView> {
     for (final order in result.orders) {
       calc.add(AddPersonOrder(name: order.name, items: order.items));
     }
-    if (result.tax != null ||
-        result.deliveryFee != null ||
-        result.discount != null) {
+    if (result.tax != null || result.deliveryFee != null || result.discount != null) {
       calc.add(
         UpdateFeesAndDiscount(
           taxFee: result.tax ?? 0,
@@ -179,16 +150,11 @@ class _CalculatorViewState extends State<_CalculatorView> {
     }
     calc.add(const CalculateBillEvent());
     final total = result.orders.fold<int>(0, (s, o) => s + o.items.length);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '${result.orders.length} orang dengan $total item berhasil ditambahkan.',
-        ),
-      ),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('${result.orders.length} orang dengan $total item berhasil ditambahkan.')));
   }
 }
-
 
 class _CalculatorHeader extends StatelessWidget {
   final VoidCallback onReset;
@@ -220,27 +186,23 @@ class _CalculatorHeader extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Hitung Patungan',
-                style: AppTheme.heading3,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+              Text('Hitung Patungan', style: AppTheme.heading3, maxLines: 1, overflow: TextOverflow.ellipsis),
               BlocBuilder<CalculatorBloc, CalculatorState>(
                 builder: (context, state) {
                   final subtitle = state.orders.isEmpty
                       ? 'Yuk, mulai tambahin pesanan'
                       : '${state.orders.length} orang siap dibagi';
-                  return Text(
-                    subtitle,
-                    style: AppTheme.bodySmall,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  );
+                  return Text(subtitle, style: AppTheme.bodySmall, maxLines: 1, overflow: TextOverflow.ellipsis);
                 },
               ),
             ],
           ),
+        ),
+        IconButton(
+          tooltip: AppTheme.isDark ? 'Mode terang' : 'Mode gelap',
+          onPressed: ThemeController.toggle,
+          icon: Icon(AppTheme.isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined),
+          color: AppTheme.textSecondary,
         ),
         BlocBuilder<CalculatorBloc, CalculatorState>(
           builder: (context, state) {
@@ -282,10 +244,7 @@ class _SectionHeader extends StatelessWidget {
         Container(
           width: 36,
           height: 36,
-          decoration: BoxDecoration(
-            color: iconBg,
-            borderRadius: BorderRadius.circular(11),
-          ),
+          decoration: BoxDecoration(color: iconBg, borderRadius: BorderRadius.circular(11)),
           child: Icon(icon, color: iconColor, size: 18),
         ),
         const SizedBox(width: AppTheme.spaceMd),
@@ -294,10 +253,7 @@ class _SectionHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(title, style: AppTheme.heading3),
-              if (subtitle != null) ...[
-                const SizedBox(height: 1),
-                Text(subtitle!, style: AppTheme.bodySmall),
-              ],
+              if (subtitle != null) ...[const SizedBox(height: 1), Text(subtitle!, style: AppTheme.bodySmall)],
             ],
           ),
         ),
@@ -315,18 +271,12 @@ class _ContinueButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<CalculatorBloc, CalculatorState>(
       builder: (context, state) {
-        final hasResult =
-            state.status == CalculatorStatus.calculated && state.result != null;
+        final hasResult = state.status == CalculatorStatus.calculated && state.result != null;
         return SizedBox(
           height: 52,
           child: ElevatedButton.icon(
             onPressed: state.orders.isEmpty ? null : onTap,
-            icon: Icon(
-              hasResult
-                  ? Icons.receipt_long_rounded
-                  : Icons.arrow_forward_rounded,
-              size: 20,
-            ),
+            icon: Icon(hasResult ? Icons.receipt_long_rounded : Icons.arrow_forward_rounded, size: 20),
             label: Text(
               hasResult
                   ? 'Lihat Ringkasan · ${AppTheme.formatRupiah(state.result!.grandTotal)}'

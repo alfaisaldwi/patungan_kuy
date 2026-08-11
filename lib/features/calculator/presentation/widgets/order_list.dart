@@ -6,6 +6,7 @@ import '../../../scanner/presentation/bloc/scanner_bloc.dart';
 import '../../domain/entities/person_order.dart';
 import '../bloc/calculator_bloc.dart';
 import 'edit_person_dialog.dart';
+import 'promo_carousel.dart';
 import 'scan_picker.dart';
 import 'small_icon_button.dart';
 
@@ -20,22 +21,17 @@ class OrdersCountBadge extends StatelessWidget {
           duration: const Duration(milliseconds: 250),
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            color: state.orders.isEmpty
-                ? AppTheme.divider
-                : AppTheme.primaryLight,
+            color: state.orders.isEmpty ? AppTheme.divider : AppTheme.primaryLight,
             borderRadius: BorderRadius.circular(AppTheme.radiusFull),
           ),
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 200),
-            transitionBuilder: (child, anim) =>
-                ScaleTransition(scale: anim, child: child),
+            transitionBuilder: (child, anim) => ScaleTransition(scale: anim, child: child),
             child: Text(
               '${state.orders.length} orang',
               key: ValueKey(state.orders.length),
               style: AppTheme.caption.copyWith(
-                color: state.orders.isEmpty
-                    ? AppTheme.disabledText
-                    : AppTheme.primary,
+                color: state.orders.isEmpty ? AppTheme.disabledText : AppTheme.primary,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -58,10 +54,7 @@ class OrderList extends StatelessWidget {
         if (state.orders.isEmpty) {
           child = _EmptyOrders(onAddManually: onAddManually);
         } else {
-          final subtotal = state.orders.fold<double>(
-            0,
-            (s, o) => s + o.totalPrice,
-          );
+          final subtotal = state.orders.fold<double>(0, (s, o) => s + o.totalPrice);
           child = Column(
             children: [
               Row(
@@ -72,9 +65,7 @@ class OrderList extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: AppTheme.spaceSm),
-              ...state.orders.map(
-                (o) => _OrderTile(key: ValueKey(o.id), order: o),
-              ),
+              ...state.orders.map((o) => _OrderTile(key: ValueKey(o.id), order: o)),
               const SizedBox(height: AppTheme.spaceXs),
               _QuickAddRow(onAddManually: onAddManually),
             ],
@@ -92,75 +83,141 @@ class OrderList extends StatelessWidget {
   }
 }
 
-
 class _EmptyOrders extends StatelessWidget {
   final VoidCallback onAddManually;
   const _EmptyOrders({required this.onAddManually});
 
   @override
   Widget build(BuildContext context) {
-    final isScanning =
-        context.watch<ScannerBloc>().state.status == ScannerStatus.loading;
+    final isScanning = context.watch<ScannerBloc>().state.status == ScannerStatus.loading;
 
+    return Column(
+      children: [
+        const PromoCarousel(),
+        // Text('Pilih salah satu cara di bawah buat mulai', style: AppTheme.bodySmall),
+        const SizedBox(height: AppTheme.spaceLg),
+        _EmptyStateChoiceCard(
+          icon: Icons.document_scanner_rounded,
+          iconBg: AppTheme.primaryLight,
+          iconColor: AppTheme.primary,
+          title: isScanning ? 'Lagi scan...' : 'Scan Struk',
+          badge: 'OTOMATIS',
+          description:
+              'Foto atau pilih gambar struk. Item & harga kebaca '
+              'otomatis, tinggal dibagi ke temen.',
+          loading: isScanning,
+          onTap: isScanning ? null : () => showScanPicker(context),
+        ),
+        const SizedBox(height: AppTheme.spaceMd),
+        _EmptyStateChoiceCard(
+          icon: Icons.edit_note_rounded,
+          iconBg: AppTheme.accentLight,
+          iconColor: AppTheme.accent,
+          title: 'Tulis Manual',
+          description:
+              'Ketik sendiri pesanan tiap orang. '
+              'Cocok buat tagihan yang simpel.',
+          onTap: onAddManually,
+        ),
+        const SizedBox(height: AppTheme.spaceLg),
+      ],
+    );
+  }
+}
+
+class _EmptyStateChoiceCard extends StatelessWidget {
+  final IconData icon;
+  final Color iconBg;
+  final Color iconColor;
+  final String title;
+  final String? badge;
+  final String description;
+  final bool loading;
+  final VoidCallback? onTap;
+
+  const _EmptyStateChoiceCard({
+    required this.icon,
+    required this.iconBg,
+    required this.iconColor,
+    required this.title,
+    this.badge,
+    required this.description,
+    this.loading = false,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppTheme.paddingCard),
       decoration: BoxDecoration(
         color: AppTheme.surface,
         borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-        border: Border.all(color: AppTheme.border, width: 1),
+        border: Border.all(color: AppTheme.border),
       ),
-      child: Column(
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: AppTheme.background,
-              borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-            ),
-            child: Icon(
-              Icons.receipt_long_outlined,
-              color: AppTheme.disabledText,
-              size: 22,
-            ),
-          ),
-          const SizedBox(height: AppTheme.spaceMd),
-          Text('Belum ada pesanan', style: AppTheme.label),
-          const SizedBox(height: 2),
-          Text(
-            'Pilih salah satu cara di bawah buat mulai',
-            style: AppTheme.bodySmall,
-          ),
-          const SizedBox(height: AppTheme.spaceLg),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: isScanning ? null : () => showScanPicker(context),
-                  icon: isScanning
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+          child: Padding(
+            padding: const EdgeInsets.all(AppTheme.paddingCard),
+            child: Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(color: iconBg, borderRadius: BorderRadius.circular(14)),
+                  child: loading
+                      ? const Center(
+                          child: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primary),
                           ),
                         )
-                      : const Icon(Icons.document_scanner_rounded, size: 18),
-                  label: Text(isScanning ? 'Lagi scan...' : 'Scan Struk'),
+                      : Icon(icon, color: iconColor, size: 24),
                 ),
-              ),
-              const SizedBox(width: AppTheme.spaceSm),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: onAddManually,
-                  icon: const Icon(Icons.person_add_alt, size: 18),
-                  label: const Text('Tambah Manual'),
+                const SizedBox(width: AppTheme.spaceLg),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(title, style: AppTheme.label.copyWith(fontSize: 16)),
+                          if (badge != null) ...[
+                            const SizedBox(width: AppTheme.spaceSm),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: AppTheme.primary,
+                                borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+                              ),
+                              child: Text(
+                                badge!,
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                  letterSpacing: 0.4,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(description, style: AppTheme.bodySmall.copyWith(height: 1.45)),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(width: AppTheme.spaceSm),
+                Icon(Icons.chevron_right_rounded, color: AppTheme.textHint),
+              ],
+            ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -172,8 +229,7 @@ class _QuickAddRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isScanning =
-        context.watch<ScannerBloc>().state.status == ScannerStatus.loading;
+    final isScanning = context.watch<ScannerBloc>().state.status == ScannerStatus.loading;
 
     return Row(
       children: [
@@ -184,21 +240,20 @@ class _QuickAddRow extends StatelessWidget {
                 ? const SizedBox(
                     width: 14,
                     height: 14,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: AppTheme.primary,
-                    ),
+                    child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primary),
                   )
                 : const Icon(Icons.document_scanner_rounded, size: 16),
             label: Text(isScanning ? 'Lagi scan...' : 'Scan Lagi'),
           ),
         ),
-        const SizedBox(width: AppTheme.spaceSm),
         Expanded(
-          child: OutlinedButton.icon(
-            onPressed: onAddManually,
-            icon: const Icon(Icons.person_add_alt, size: 16),
-            label: const Text('Tambah Orang'),
+          child: Visibility(
+            visible: false,
+            child: OutlinedButton.icon(
+              onPressed: onAddManually,
+              icon: const Icon(Icons.person_add_alt, size: 16),
+              label: const Text('Tambah Orang'),
+            ),
           ),
         ),
       ],
@@ -230,8 +285,7 @@ class _OrderTile extends StatelessWidget {
           content: Text('Pesanan ${order.name} dihapus.'),
           action: SnackBarAction(
             label: 'Urungkan',
-            onPressed: () =>
-                calc.add(AddPersonOrder(name: order.name, items: order.items)),
+            onPressed: () => calc.add(AddPersonOrder(name: order.name, items: order.items)),
           ),
         ),
       );
@@ -245,10 +299,7 @@ class _OrderTile extends StatelessWidget {
       curve: Curves.easeOutCubic,
       builder: (context, t, child) => Opacity(
         opacity: t,
-        child: Transform.translate(
-          offset: Offset(0, 12 * (1 - t)),
-          child: child,
-        ),
+        child: Transform.translate(offset: Offset(0, 12 * (1 - t)), child: child),
       ),
       child: _buildTile(context),
     );
@@ -277,24 +328,14 @@ class _OrderTile extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Center(
-                    child: Text(
-                      order.name[0].toUpperCase(),
-                      style: AppTheme.label.copyWith(color: Colors.white),
-                    ),
+                    child: Text(order.name[0].toUpperCase(), style: AppTheme.label.copyWith(color: Colors.white)),
                   ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(child: Text(order.name, style: AppTheme.label)),
-                Text(
-                  AppTheme.formatRupiah(order.totalPrice),
-                  style: AppTheme.price,
-                ),
+                Text(AppTheme.formatRupiah(order.totalPrice), style: AppTheme.price),
                 const SizedBox(width: 6),
-                SmallIconButton(
-                  icon: Icons.edit_outlined,
-                  tooltip: 'Ubah',
-                  onTap: () => _openEditDialog(context),
-                ),
+                SmallIconButton(icon: Icons.edit_outlined, tooltip: 'Ubah', onTap: () => _openEditDialog(context)),
                 const SizedBox(width: 4),
                 SmallIconButton(
                   icon: Icons.delete_outline,
@@ -314,14 +355,8 @@ class _OrderTile extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        item.name.isNotEmpty ? item.name : '(tanpa nama)',
-                        style: AppTheme.bodySmall,
-                      ),
-                      Text(
-                        AppTheme.formatRupiah(item.price),
-                        style: AppTheme.bodySmall,
-                      ),
+                      Text(item.name.isNotEmpty ? item.name : '(tanpa nama)', style: AppTheme.bodySmall),
+                      Text(AppTheme.formatRupiah(item.price), style: AppTheme.bodySmall),
                     ],
                   ),
                 ),

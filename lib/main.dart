@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_controller.dart';
-import 'features/start/presentation/pages/start_page.dart';
+import 'features/home/presentation/pages/home_page.dart';
 import 'injection_container.dart';
 
 void main() async {
@@ -24,7 +24,7 @@ class PatunganKuyApp extends StatelessWidget {
           title: 'PatunganKuy',
           debugShowCheckedModeBanner: false,
           theme: _buildTheme(isDark),
-          home: KeyedSubtree(key: ValueKey(isDark), child: const StartPage()),
+          home: KeyedSubtree(key: ValueKey(isDark), child: const HomePage()),
         );
       },
     );
