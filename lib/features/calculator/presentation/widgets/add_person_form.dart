@@ -173,6 +173,7 @@ class AddPersonFormState extends State<AddPersonForm> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                      const SizedBox(height: AppTheme.spaceSm),
                     TextFormField(
                       controller: _nameController,
                       decoration: AppTheme.inputDecoration(

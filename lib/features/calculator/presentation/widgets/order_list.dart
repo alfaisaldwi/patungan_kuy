@@ -230,6 +230,7 @@ class _QuickAddRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isScanning = context.watch<ScannerBloc>().state.status == ScannerStatus.loading;
+    var isHidden = false;
 
     return Row(
       children: [
@@ -248,7 +249,7 @@ class _QuickAddRow extends StatelessWidget {
         ),
         Expanded(
           child: Visibility(
-            visible: false,
+            visible: isHidden,
             child: OutlinedButton.icon(
               onPressed: onAddManually,
               icon: const Icon(Icons.person_add_alt, size: 16),

@@ -36,8 +36,18 @@ class _CalculatorView extends StatefulWidget {
 
 class _CalculatorViewState extends State<_CalculatorView> {
   final _addPersonFormKey = GlobalKey<AddPersonFormState>();
+  bool _showAddPersonForm = false;
 
-  void _expandAddPersonForm() => _addPersonFormKey.currentState?.expand();
+  void _expandAddPersonForm() {
+    if (_showAddPersonForm) {
+      _addPersonFormKey.currentState?.expand();
+      return;
+    }
+    setState(() => _showAddPersonForm = true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _addPersonFormKey.currentState?.expand();
+    });
+  }
 
   void _confirmReset() {
     final state = context.read<CalculatorBloc>().state;
@@ -100,11 +110,11 @@ class _CalculatorViewState extends State<_CalculatorView> {
                     ],
                     OrderList(onAddManually: _expandAddPersonForm),
                     const SizedBox(height: AppTheme.spaceMd),
-                    if (hasOrders) ...[
+                    if (hasOrders || _showAddPersonForm) ...[
                       AddPersonForm(key: _addPersonFormKey),
                       const SizedBox(height: AppTheme.space2xl),
-                      _ContinueButton(onTap: _openSummary),
                     ],
+                    if (hasOrders) _ContinueButton(onTap: _openSummary),
                     const SizedBox(height: AppTheme.space2xl),
                   ],
                 );
@@ -275,6 +285,14 @@ class _ContinueButton extends StatelessWidget {
         return SizedBox(
           height: 52,
           child: ElevatedButton.icon(
+            style: ButtonStyle(
+              shape: WidgetStateProperty.all<OutlinedBorder>(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  side: const BorderSide(color: Colors.transparent, width: 1),
+                ),
+              ),
+            ),
             onPressed: state.orders.isEmpty ? null : onTap,
             icon: Icon(hasResult ? Icons.receipt_long_rounded : Icons.arrow_forward_rounded, size: 20),
             label: Text(
