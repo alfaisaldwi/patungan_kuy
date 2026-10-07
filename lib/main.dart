@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import 'core/onboarding/showcase_tour.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_controller.dart';
 import 'features/home/presentation/pages/home_page.dart';
+import 'features/splash/presentation/pages/splash_page.dart';
 import 'injection_container.dart';
 
 void main() async {
@@ -12,8 +14,27 @@ void main() async {
   runApp(const PatunganKuyApp());
 }
 
-class PatunganKuyApp extends StatelessWidget {
+class PatunganKuyApp extends StatefulWidget {
   const PatunganKuyApp({super.key});
+
+  @override
+  State<PatunganKuyApp> createState() => _PatunganKuyAppState();
+}
+
+class _PatunganKuyAppState extends State<PatunganKuyApp> {
+  // Halaman utama baru dibangun menjelang splash selesai; splash dilepas
+  // setelah selesai memudar. Keduanya disimpan di sini (di luar key tema)
+  // supaya berganti tema tidak memunculkan splash lagi.
+  bool _homeReady = false;
+  bool _splashDone = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Sekali saja, di luar HomePage, supaya tidak ikut ter-reset saat tema
+    // berganti (HomePage dibangun ulang).
+    ShowcaseTour.register();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +45,19 @@ class PatunganKuyApp extends StatelessWidget {
           title: 'PatunganKuy',
           debugShowCheckedModeBanner: false,
           theme: _buildTheme(isDark),
-          home: KeyedSubtree(key: ValueKey(isDark), child: const HomePage()),
+          home: Stack(
+            fit: StackFit.expand,
+            children: [
+              if (_homeReady)
+                KeyedSubtree(key: ValueKey(isDark), child: const HomePage()),
+              if (!_splashDone)
+                SplashPage(
+                  key: const ValueKey('splash'),
+                  onReveal: () => setState(() => _homeReady = true),
+                  onFinished: () => setState(() => _splashDone = true),
+                ),
+            ],
+          ),
         );
       },
     );

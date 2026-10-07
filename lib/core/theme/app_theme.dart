@@ -163,7 +163,7 @@ class AppTheme {
   static const double spaceXl = 24;
   static const double space2xl = 32;
 
-  static const double paddingPage = 20;
+  static const double paddingPage = 14;
   static const double paddingCard = 16;
 
   // ── Radius ───────────────────────────────────────────────────────────────

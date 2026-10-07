@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/onboarding/showcase_tour.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../scanner/presentation/bloc/scanner_bloc.dart';
 import '../../domain/entities/person_order.dart';
@@ -96,28 +97,40 @@ class _EmptyOrders extends StatelessWidget {
         const PromoCarousel(),
         // Text('Pilih salah satu cara di bawah buat mulai', style: AppTheme.bodySmall),
         const SizedBox(height: AppTheme.spaceLg),
-        _EmptyStateChoiceCard(
-          icon: Icons.document_scanner_rounded,
-          iconBg: AppTheme.primaryLight,
-          iconColor: AppTheme.primary,
-          title: isScanning ? 'Lagi scan...' : 'Scan Struk',
-          badge: 'OTOMATIS',
+        TourTarget(
+          tourKey: ShowcaseTour.scanKey,
+          title: 'Scan Struk',
           description:
-              'Foto atau pilih gambar struk. Item & harga kebaca '
-              'otomatis, tinggal dibagi ke temen.',
-          loading: isScanning,
-          onTap: isScanning ? null : () => showScanPicker(context),
+              'Foto struknya, item dan harga kebaca otomatis. Tinggal dibagi ke temen.',
+          child: _EmptyStateChoiceCard(
+            icon: Icons.document_scanner_rounded,
+            iconBg: AppTheme.primaryLight,
+            iconColor: AppTheme.primary,
+            title: isScanning ? 'Lagi scan...' : 'Scan Struk',
+            badge: 'OTOMATIS',
+            description:
+                'Foto atau pilih gambar struk. Item & harga kebaca '
+                'otomatis, tinggal dibagi ke temen.',
+            loading: isScanning,
+            onTap: isScanning ? null : () => showScanPicker(context),
+          ),
         ),
         const SizedBox(height: AppTheme.spaceMd),
-        _EmptyStateChoiceCard(
-          icon: Icons.edit_note_rounded,
-          iconBg: AppTheme.accentLight,
-          iconColor: AppTheme.accent,
+        TourTarget(
+          tourKey: ShowcaseTour.manualKey,
           title: 'Tulis Manual',
           description:
-              'Ketik sendiri pesanan tiap orang. '
-              'Cocok buat tagihan yang simpel.',
-          onTap: onAddManually,
+              'Nggak ada struk? Ketik sendiri pesanan tiap orang, cocok buat tagihan yang simpel.',
+          child: _EmptyStateChoiceCard(
+            icon: Icons.edit_note_rounded,
+            iconBg: AppTheme.accentLight,
+            iconColor: AppTheme.accent,
+            title: 'Tulis Manual',
+            description:
+                'Ketik sendiri pesanan tiap orang. '
+                'Cocok buat tagihan yang simpel.',
+            onTap: onAddManually,
+          ),
         ),
         const SizedBox(height: AppTheme.spaceLg),
       ],

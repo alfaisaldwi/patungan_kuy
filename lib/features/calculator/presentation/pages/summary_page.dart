@@ -7,7 +7,6 @@ import '../bloc/calculator_bloc.dart';
 import '../widgets/fees_discount_section.dart';
 import '../widgets/result_widgets.dart';
 
-
 class SummaryPage extends StatelessWidget {
   const SummaryPage({super.key});
 
@@ -43,57 +42,61 @@ class _SummaryViewState extends State<_SummaryView> {
     );
   }
 
+  /// Hitung ulang lalu selalu tampilkan sheet hasil. Tidak bergantung pada
+  /// perubahan status bloc: kalau data tidak berubah sejak hitung terakhir,
+  /// state-nya sama persis dan tidak ada emisi baru.
+  Future<void> _calculateAndShow() async {
+    final calc = context.read<CalculatorBloc>();
+    calc.add(const CalculateBillEvent());
+    // Beri kesempatan bloc memproses event sebelum state dibaca.
+    await Future<void>.delayed(Duration.zero);
+    if (!mounted) return;
+    if (calc.state.status == CalculatorStatus.calculated &&
+        calc.state.result != null) {
+      _showResultSheet();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BlocListener<CalculatorBloc, CalculatorState>(
-      listenWhen: (prev, curr) =>
-          curr.status == CalculatorStatus.calculated &&
-          prev.status != CalculatorStatus.calculated &&
-          curr.result != null,
-      listener: (context, state) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) _showResultSheet();
-        });
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text('Ringkasan Tagihan', style: AppTheme.heading3),
-        ),
-        body: Column(
-          children: [
-            Expanded(
-              child: SafeArea(
-                bottom: false,
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppTheme.paddingPage,
-                    vertical: AppTheme.spaceLg,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _SectionHeader(
-                        icon: Icons.receipt_long_rounded,
-                        iconBg: AppTheme.accentLight,
-                        iconColor: AppTheme.accent,
-                        title: 'Biaya & Diskon',
-                        subtitle: 'Ongkir, pajak, dan promo kalau ada',
-                      ),
-                      const SizedBox(height: AppTheme.spaceLg),
-                      const FeesDiscountSection(),
-                      const SizedBox(height: AppTheme.space2xl),
-                      const _CalculateButton(),
-                      const SizedBox(height: AppTheme.spaceMd),
-                      const _ErrorDisplay(),
-                      const SizedBox(height: AppTheme.space2xl),
-                    ],
-                  ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Ringkasan Tagihan', style: AppTheme.heading3),
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: SafeArea(
+              bottom: false,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppTheme.paddingPage,
+                  vertical: AppTheme.spaceLg,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _SectionHeader(
+                      icon: Icons.receipt_long_rounded,
+                      iconBg: AppTheme.accentLight,
+                      iconColor: AppTheme.accent,
+                      title: 'Biaya & Diskon',
+                      subtitle: 'Ongkir, pajak, dan promo kalau ada',
+                    ),
+                    const SizedBox(height: AppTheme.spaceLg),
+                    const FeesDiscountSection(),
+                    const SizedBox(height: AppTheme.space2xl),
+                    _CalculateButton(onPressed: _calculateAndShow),
+                    const SizedBox(height: AppTheme.spaceMd),
+                    const _ErrorDisplay(),
+                    const SizedBox(height: AppTheme.space2xl),
+                  ],
                 ),
               ),
             ),
-            ResultSummaryBar(onView: _showResultSheet),
-          ],
-        ),
+          ),
+          ResultSummaryBar(onView: _showResultSheet),
+        ],
       ),
     );
   }
@@ -146,7 +149,9 @@ class _SectionHeader extends StatelessWidget {
 }
 
 class _CalculateButton extends StatelessWidget {
-  const _CalculateButton();
+  final VoidCallback onPressed;
+
+  const _CalculateButton({required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -155,11 +160,7 @@ class _CalculateButton extends StatelessWidget {
         return SizedBox(
           height: 52,
           child: ElevatedButton.icon(
-            onPressed: state.orders.isEmpty
-                ? null
-                : () => context.read<CalculatorBloc>().add(
-                    const CalculateBillEvent(),
-                  ),
+            onPressed: state.orders.isEmpty ? null : onPressed,
             icon: const Icon(Icons.calculate_outlined, size: 20),
             label: const Text(
               'Hitung Patungan',

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:persistent_bottom_nav_bar_v2/persistent_bottom_nav_bar_v2.dart';
 
+import '../../../../core/onboarding/showcase_tour.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../injection_container.dart';
 import '../../../calculator/presentation/bloc/calculator_bloc.dart';
@@ -49,13 +50,23 @@ class _HomePageState extends State<HomePage> {
     initialIndex: widget.initialTab,
   );
   final _openSheetCount = ValueNotifier<int>(0);
-  late final _calculatorTabSheetObserver =
-      _BottomSheetVisibilityObserver(_openSheetCount);
-  late final _historyTabSheetObserver =
-      _BottomSheetVisibilityObserver(_openSheetCount);
+  late final _calculatorTabSheetObserver = _BottomSheetVisibilityObserver(
+    _openSheetCount,
+  );
+  late final _historyTabSheetObserver = _BottomSheetVisibilityObserver(
+    _openSheetCount,
+  );
 
   static const _homeTabIndex = 0;
   DateTime? _lastBackPressTime;
+
+  @override
+  void initState() {
+    super.initState();
+    ShowcaseTour.startIfFirstTime(
+      canStart: () => mounted && _controller.index == _homeTabIndex,
+    );
+  }
 
   @override
   void dispose() {
@@ -71,7 +82,8 @@ class _HomePageState extends State<HomePage> {
     }
 
     final now = DateTime.now();
-    final isSecondPress = _lastBackPressTime != null &&
+    final isSecondPress =
+        _lastBackPressTime != null &&
         now.difference(_lastBackPressTime!) < const Duration(seconds: 2);
 
     if (isSecondPress) {
@@ -154,8 +166,10 @@ class _HomePageState extends State<HomePage> {
                 item: ItemConfig(
                   icon: const Icon(Icons.home_rounded),
                   title: 'Beranda',
-                  textStyle:
-                      TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
+                  textStyle: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                  ),
                   activeForegroundColor: AppTheme.primary,
                   inactiveForegroundColor: AppTheme.disabledText,
                   iconSize: 28,
@@ -169,8 +183,10 @@ class _HomePageState extends State<HomePage> {
                 item: ItemConfig(
                   icon: const Icon(Icons.history),
                   title: 'Riwayat',
-                  textStyle:
-                      TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+                  textStyle: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                  ),
                   activeForegroundColor: AppTheme.primary,
                   inactiveForegroundColor: AppTheme.disabledText,
                   iconSize: 28,
@@ -180,10 +196,21 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ],
-            navBarBuilder: (navBarConfig) =>
-                FloatingNavBar(navBarConfig: navBarConfig),
+            navBarBuilder: (navBarConfig) => FloatingNavBar(
+              navBarConfig: navBarConfig,
+              itemWrapper: (index, item) => index == 1
+                  ? TourTarget(
+                      tourKey: ShowcaseTour.historyKey,
+                      title: 'Riwayat',
+                      description:
+                          'Semua tagihan yang pernah dihitung tersimpan di sini, '
+                          'bisa dibuka lagi kapan aja.',
+                      child: item,
+                    )
+                  : item,
+            ),
             navBarOverlap: const NavBarOverlap.full(),
-            margin: const EdgeInsets.fromLTRB(80, 0, 80, 8),
+            margin: const EdgeInsets.fromLTRB(60, 0, 60, 8),
             stateManagement: true,
             backgroundColor: Colors.transparent,
           ),

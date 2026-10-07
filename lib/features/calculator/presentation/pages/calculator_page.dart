@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/onboarding/showcase_tour.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/theme_controller.dart';
 import '../../../../injection_container.dart';
@@ -208,11 +209,17 @@ class _CalculatorHeader extends StatelessWidget {
             ],
           ),
         ),
-        IconButton(
-          tooltip: AppTheme.isDark ? 'Mode terang' : 'Mode gelap',
-          onPressed: ThemeController.toggle,
-          icon: Icon(AppTheme.isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined),
-          color: AppTheme.textSecondary,
+        TourTarget(
+          tourKey: ShowcaseTour.themeKey,
+          title: 'Mode Terang / Gelap',
+          description: 'Ganti tampilan sesuai selera atau kondisi cahaya.',
+          radius: AppTheme.radiusFull,
+          child: IconButton(
+            tooltip: AppTheme.isDark ? 'Mode terang' : 'Mode gelap',
+            onPressed: ThemeController.toggle,
+            icon: Icon(AppTheme.isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined),
+            color: AppTheme.textSecondary,
+          ),
         ),
         BlocBuilder<CalculatorBloc, CalculatorState>(
           builder: (context, state) {

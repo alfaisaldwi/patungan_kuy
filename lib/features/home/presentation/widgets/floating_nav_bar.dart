@@ -5,7 +5,15 @@ import '../../../../core/theme/app_theme.dart';
 
 class FloatingNavBar extends StatelessWidget {
   final NavBarConfig navBarConfig;
-  const FloatingNavBar({super.key, required this.navBarConfig});
+
+  /// Opsional: membungkus item ke-[index] (mis. untuk showcase).
+  final Widget Function(int index, Widget item)? itemWrapper;
+
+  const FloatingNavBar({
+    super.key,
+    required this.navBarConfig,
+    this.itemWrapper,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +21,7 @@ class FloatingNavBar extends StatelessWidget {
     final selectedIndex = navBarConfig.selectedIndex;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       decoration: BoxDecoration(
         color: AppTheme.surface.withOpacity(.8),
         borderRadius: BorderRadius.circular(AppTheme.radiusXl),
@@ -22,13 +30,12 @@ class FloatingNavBar extends StatelessWidget {
       ),
       child: Row(
         children: List.generate(items.length, (i) {
-          return Expanded(
-            child: _NavItem(
-              item: items[i],
-              selected: i == selectedIndex,
-              onTap: () => navBarConfig.onItemSelected(i),
-            ),
+          final item = _NavItem(
+            item: items[i],
+            selected: i == selectedIndex,
+            onTap: () => navBarConfig.onItemSelected(i),
           );
+          return Expanded(child: itemWrapper?.call(i, item) ?? item);
         }),
       ),
     );
@@ -58,7 +65,7 @@ class _NavItem extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeOut,
-        padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 10),
 
         decoration: BoxDecoration(
           color: selected ? item.activeForegroundColor.withAlpha(28) : null,
