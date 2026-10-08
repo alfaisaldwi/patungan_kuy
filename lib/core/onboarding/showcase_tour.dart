@@ -4,27 +4,23 @@ import 'package:showcaseview/showcaseview.dart';
 
 import '../theme/app_theme.dart';
 
-/// Tur fitur untuk pengguna baru. Status "sudah pernah lihat" tiap tur
-/// disimpan di SharedPreferences (offline), jadi tur hanya muncul sekali.
 class ShowcaseTour {
   ShowcaseTour._();
 
-  // ── Tur beranda ──────────────────────────────────────────────────────────
   static const String _homePref = 'has_seen_showcase';
 
   static final scanKey = GlobalKey(debugLabel: 'tour_scan');
   static final manualKey = GlobalKey(debugLabel: 'tour_manual');
-  static final themeKey = GlobalKey(debugLabel: 'tour_theme');
+  static final settingsKey = GlobalKey(debugLabel: 'tour_settings');
   static final historyKey = GlobalKey(debugLabel: 'tour_history');
 
   static List<GlobalKey> get steps => [
     scanKey,
     manualKey,
-    themeKey,
+    settingsKey,
     historyKey,
   ];
 
-  // ── Tur halaman bagi-bagi item ───────────────────────────────────────────
   static const String assignmentScope = 'assignment';
   static const String _assignmentPref = 'has_seen_assignment_showcase';
 
@@ -40,7 +36,6 @@ class ShowcaseTour {
     assignFinishKey,
   ];
 
-  /// Daftarkan sekali di awal aplikasi, sebelum widget [TourTarget] dibangun.
   static void register() {
     ShowcaseView.register(
       enableAutoScroll: true,
@@ -54,8 +49,6 @@ class ShowcaseTour {
     );
   }
 
-  /// Dipanggil oleh halaman bagi-bagi item; kembalikan view-nya agar bisa
-  /// di-`unregister` saat halaman ditutup.
   static ShowcaseView registerAssignment() {
     return ShowcaseView.register(
       scope: assignmentScope,
@@ -77,7 +70,6 @@ class ShowcaseTour {
     gapBetweenContentAndAction: 8,
   );
 
-  /// "Lewati" + "Lanjut" di semua langkah, "Selesai" hanya di langkah [last].
   static List<TooltipActionButton> _actions({required GlobalKey last}) {
     const onPrimary = Colors.white;
     final primary = AppTheme.primary;
@@ -123,7 +115,6 @@ class ShowcaseTour {
     ];
   }
 
-  /// Jika gagal membaca, anggap sudah pernah lihat supaya tidak mengganggu.
   static Future<bool> _hasSeen(String key) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -133,6 +124,14 @@ class ShowcaseTour {
     }
   }
 
+  static Future<void> resetAll() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_homePref);
+      await prefs.remove(_assignmentPref);
+    } catch (_) {}
+  }
+
   static Future<void> _markSeen(String key) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -140,8 +139,6 @@ class ShowcaseTour {
     } catch (_) {}
   }
 
-  /// Mulai tur beranda kalau belum pernah ditampilkan. [delay] memberi waktu
-  /// agar splash dan transisi halaman selesai dulu.
   static Future<void> startIfFirstTime({
     required bool Function() canStart,
     Duration delay = const Duration(milliseconds: 900),
@@ -176,11 +173,11 @@ class ShowcaseTour {
     if (!canStart()) return;
     final v = view();
     if (v.isShowcaseRunning) return;
+    if (!steps.any(v.isTargetRendered)) return;
     v.startShowCase(steps);
   }
 }
 
-/// Pembungkus [Showcase] dengan gaya PatunganKuy.
 class TourTarget extends StatelessWidget {
   final GlobalKey tourKey;
   final String title;

@@ -8,7 +8,6 @@ import '../models/bill_history_model.dart';
 class BillHistoryDataSource {
   static const String boxName = 'bill_history';
 
-  /// Oldest entries are evicted once the box grows past this size.
   static const int maxEntries = 100;
 
   final Box<String> _box;

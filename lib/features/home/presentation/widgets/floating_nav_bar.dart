@@ -6,7 +6,6 @@ import '../../../../core/theme/app_theme.dart';
 class FloatingNavBar extends StatelessWidget {
   final NavBarConfig navBarConfig;
 
-  /// Opsional: membungkus item ke-[index] (mis. untuk showcase).
   final Widget Function(int index, Widget item)? itemWrapper;
 
   const FloatingNavBar({

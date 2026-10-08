@@ -10,7 +10,6 @@ class AppTheme {
 
   static void setDark(bool value) => _isDark = value;
 
-  // ── Soft modern palette (indigo lembut) ──────────────────────────────────
   static const Color primary = Color(0xFF6366F1);
   static const Color primaryDark = Color(0xFF4F46E5);
   static const Color secondary = Color(0xFF0F172A);
@@ -55,11 +54,9 @@ class AppTheme {
   static Color get disabledText =>
       _isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8);
 
-  // ── Gradients ────────────────────────────────────────────────────────────
   static List<Color> get primaryGradient => [primary, const Color(0xFF8B5CF6)];
   static List<Color> get accentGradient => [accent, const Color(0xFF38BDF8)];
 
-  // ── Typography ───────────────────────────────────────────────────────────
   static TextStyle get heading1 => TextStyle(
     fontSize: 24,
     fontWeight: FontWeight.w700,
@@ -155,7 +152,6 @@ class AppTheme {
     return double.tryParse(s) ?? 0.0;
   }
 
-  // ── Spacing ──────────────────────────────────────────────────────────────
   static const double spaceXs = 4;
   static const double spaceSm = 8;
   static const double spaceMd = 12;
@@ -166,14 +162,12 @@ class AppTheme {
   static const double paddingPage = 14;
   static const double paddingCard = 16;
 
-  // ── Radius ───────────────────────────────────────────────────────────────
   static const double radiusSm = 8;
   static const double radiusMd = 12;
   static const double radiusLg = 16;
   static const double radiusXl = 20;
   static const double radiusFull = 999;
 
-  // ── Shadows (soft, elevated) ─────────────────────────────────────────────
   static BoxShadow get shadowSm => BoxShadow(
     color: const Color(0xFF0A0E27).withAlpha(_isDark ? 60 : 10),
     blurRadius: 6,
@@ -192,7 +186,6 @@ class AppTheme {
     offset: const Offset(0, 8),
   );
 
-  // ── Input decoration ─────────────────────────────────────────────────────
   static InputDecoration inputDecoration({
     required String label,
     String? hint,
@@ -232,7 +225,6 @@ class AppTheme {
     );
   }
 
-  // ── Button styles ────────────────────────────────────────────────────────
   static ButtonStyle get primaryButton => ElevatedButton.styleFrom(
     backgroundColor: primary,
     foregroundColor: textOnPrimary,
@@ -272,7 +264,6 @@ class AppTheme {
     textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
   );
 
-  // ── Card decorations ─────────────────────────────────────────────────────
   static BoxDecoration get cardDecoration => BoxDecoration(
     color: surface,
     borderRadius: BorderRadius.circular(radiusLg),

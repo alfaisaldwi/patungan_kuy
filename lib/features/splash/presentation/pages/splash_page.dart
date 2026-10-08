@@ -4,15 +4,9 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-/// Splash animasi (~2,7 dtk): maskot muncul memantul, teks menyusul, lalu
-/// indikator. Warna sengaja tetap putih (tidak mengikuti tema aplikasi)
-/// supaya sama dengan splash native.
 class SplashPage extends StatefulWidget {
-  /// Dipanggil sesaat sebelum splash memudar; saat itu halaman utama boleh
-  /// mulai dibangun di belakang splash.
   final VoidCallback onReveal;
 
-  /// Dipanggil setelah splash selesai memudar dan boleh dilepas.
   final VoidCallback onFinished;
 
   const SplashPage({
@@ -32,7 +26,6 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
   static const _logoW = 250.0;
   static const _logoH = _logoW * 600 / 1920;
 
-  /// Bagian maskot pada logo (x 0..170 dari 640); sisanya adalah teks.
   static const _markFrac = 170 / 640;
 
   static const _holdBeforeReveal = Duration(milliseconds: 2200);
@@ -104,7 +97,6 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  /// Potongan horizontal dari gambar logo: [from]..[from + width] (pecahan).
   Widget _logoPart({required double from, required double width}) {
     return SizedBox(
       width: _logoW * width,

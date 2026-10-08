@@ -10,12 +10,9 @@ import '../../domain/entities/bill_result.dart';
 import '../../domain/entities/person_order.dart';
 import '../widgets/receipt_image_view.dart';
 
-/// Membuat gambar struk panjang (lebar seukuran layar HP, tinggi mengikuti
-/// isi) lalu membagikannya.
 class ReceiptImageGenerator {
   ReceiptImageGenerator._();
 
-  /// Batas aman tinggi tekstur GPU.
   static const double _maxPixelHeight = 8000;
 
   static Future<bool> shareReceipt({
@@ -35,15 +32,12 @@ class ReceiptImageGenerator {
         precacheImage(const AssetImage(ReceiptImageView.logoLight), context),
       ]);
 
-      // Dirender di luar layar dengan tinggi tak terbatas.
       entry = OverlayEntry(
         builder: (_) => Positioned(
           left: -width * 2,
           top: 0,
           width: width,
           child: IgnorePointer(
-            // OverflowBox tidak boleh ukurannya tak terbatas, jadi diberi kotak
-            // induk berukuran tetap; isi struk tetap leluasa meluap ke bawah.
             child: SizedBox(
               height: 1,
               child: OverflowBox(

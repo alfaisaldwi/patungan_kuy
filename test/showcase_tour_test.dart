@@ -26,7 +26,6 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     await _pumpHome(tester);
 
-    // Belum ada tur sebelum jeda awal.
     expect(ShowcaseView.get().isShowcaseRunning, isFalse);
 
     await tester.pump(const Duration(milliseconds: 1200));

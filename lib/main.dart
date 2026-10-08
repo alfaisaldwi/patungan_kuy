@@ -22,17 +22,12 @@ class PatunganKuyApp extends StatefulWidget {
 }
 
 class _PatunganKuyAppState extends State<PatunganKuyApp> {
-  // Halaman utama baru dibangun menjelang splash selesai; splash dilepas
-  // setelah selesai memudar. Keduanya disimpan di sini (di luar key tema)
-  // supaya berganti tema tidak memunculkan splash lagi.
   bool _homeReady = false;
   bool _splashDone = false;
 
   @override
   void initState() {
     super.initState();
-    // Sekali saja, di luar HomePage, supaya tidak ikut ter-reset saat tema
-    // berganti (HomePage dibangun ulang).
     ShowcaseTour.register();
   }
 

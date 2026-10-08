@@ -14,8 +14,6 @@ class CalculatorBloc extends Bloc<CalculatorEvent, CalculatorState> {
   final CalculateBillUseCase _calculateBillUseCase;
   final SaveBillHistoryUseCase _saveBillHistoryUseCase;
 
-  /// Signature of the last auto-saved calculation, used to avoid writing
-  /// duplicate history entries when the same bill is recalculated.
   String? _lastSavedSignature;
 
   CalculatorBloc({
@@ -145,8 +143,6 @@ class CalculatorBloc extends Bloc<CalculatorEvent, CalculatorState> {
     Emitter<CalculatorState> emit,
   ) {
     final entry = event.entry;
-    // Mark as already saved so recalculating the restored bill unchanged
-    // does not create a duplicate history entry.
     _lastSavedSignature = _signature(
       entry.orders,
       entry.taxFee,
@@ -198,7 +194,6 @@ class CalculatorBloc extends Bloc<CalculatorEvent, CalculatorState> {
         result: billResult,
       ),
     );
-    // History is best-effort: a failed save never disrupts the calculation UX.
     saved.fold((_) {}, (_) => _lastSavedSignature = signature);
   }
 

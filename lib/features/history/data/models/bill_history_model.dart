@@ -3,7 +3,6 @@ import '../../../calculator/domain/entities/calculated_bill.dart';
 import '../../../calculator/domain/entities/person_order.dart';
 import '../../domain/entities/bill_history.dart';
 
-/// JSON (de)serialization for [BillHistory] and its nested entities.
 class BillHistoryModel {
   BillHistoryModel._();
 

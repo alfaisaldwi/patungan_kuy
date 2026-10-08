@@ -95,7 +95,6 @@ class _EmptyOrders extends StatelessWidget {
     return Column(
       children: [
         const PromoCarousel(),
-        // Text('Pilih salah satu cara di bawah buat mulai', style: AppTheme.bodySmall),
         const SizedBox(height: AppTheme.spaceLg),
         TourTarget(
           tourKey: ShowcaseTour.scanKey,

@@ -42,13 +42,9 @@ class _SummaryViewState extends State<_SummaryView> {
     );
   }
 
-  /// Hitung ulang lalu selalu tampilkan sheet hasil. Tidak bergantung pada
-  /// perubahan status bloc: kalau data tidak berubah sejak hitung terakhir,
-  /// state-nya sama persis dan tidak ada emisi baru.
   Future<void> _calculateAndShow() async {
     final calc = context.read<CalculatorBloc>();
     calc.add(const CalculateBillEvent());
-    // Beri kesempatan bloc memproses event sebelum state dibaca.
     await Future<void>.delayed(Duration.zero);
     if (!mounted) return;
     if (calc.state.status == CalculatorStatus.calculated &&

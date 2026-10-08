@@ -125,7 +125,6 @@ class _AssignmentViewState extends State<_AssignmentView> {
   @override
   void initState() {
     super.initState();
-    // Akses _tour agar terdaftar sebelum widget TourTarget dibangun.
     _tour;
     ShowcaseTour.startAssignmentIfFirstTime(canStart: () => mounted);
   }
@@ -1294,9 +1293,6 @@ class _AssignmentChecklistSheet extends StatefulWidget {
 class _AssignmentChecklistSheetState extends State<_AssignmentChecklistSheet> {
   Person get person => widget.person;
 
-  /// Urutan item dikunci saat sheet dibuka: item yang belum dipilih siapa pun
-  /// di atas, yang sudah dipilih di bawah. Urutan tidak berubah selama sheet
-  /// terbuka, supaya item tidak "loncat" saat dicentang.
   late final List<String> _order;
 
   @override

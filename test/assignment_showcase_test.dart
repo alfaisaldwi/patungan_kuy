@@ -42,7 +42,6 @@ void main() {
 
     final prefs = await SharedPreferences.getInstance();
     expect(prefs.getBool('has_seen_assignment_showcase'), isTrue);
-    // Tur beranda tidak ikut ditandai.
     expect(prefs.getBool('has_seen_showcase'), isNull);
 
     await tester.pumpWidget(const SizedBox());

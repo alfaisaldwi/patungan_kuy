@@ -3,11 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/onboarding/showcase_tour.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/theme/theme_controller.dart';
 import '../../../../injection_container.dart';
 import '../../../assignment/presentation/models/assignment_result.dart';
 import '../../../assignment/presentation/pages/assignment_page.dart';
 import '../../../scanner/presentation/bloc/scanner_bloc.dart';
+import '../../../settings/presentation/pages/settings_page.dart';
 import '../bloc/calculator_bloc.dart';
 import '../widgets/add_person_form.dart';
 import '../widgets/order_list.dart';
@@ -64,7 +64,10 @@ class _CalculatorViewState extends State<_CalculatorView> {
           style: AppTheme.body,
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Batal')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Batal'),
+          ),
           TextButton(
             onPressed: () {
               Navigator.pop(ctx, true);
@@ -78,7 +81,10 @@ class _CalculatorViewState extends State<_CalculatorView> {
   }
 
   void _openSummary() {
-    Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(builder: (_) => const SummaryPage()));
+    Navigator.of(
+      context,
+      rootNavigator: true,
+    ).push(MaterialPageRoute(builder: (_) => const SummaryPage()));
   }
 
   @override
@@ -88,9 +94,13 @@ class _CalculatorViewState extends State<_CalculatorView> {
       child: Scaffold(
         body: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: AppTheme.paddingPage, vertical: AppTheme.spaceLg),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppTheme.paddingPage,
+              vertical: AppTheme.spaceLg,
+            ),
             child: BlocBuilder<CalculatorBloc, CalculatorState>(
-              buildWhen: (prev, curr) => prev.orders.isEmpty != curr.orders.isEmpty,
+              buildWhen: (prev, curr) =>
+                  prev.orders.isEmpty != curr.orders.isEmpty,
               builder: (context, state) {
                 final hasOrders = state.orders.isNotEmpty;
                 return Column(
@@ -130,7 +140,11 @@ class _CalculatorViewState extends State<_CalculatorView> {
   void _onScannerStateChanged(BuildContext context, ScannerState state) {
     if (state.status == ScannerStatus.success && state.parsedReceipt != null) {
       Navigator.of(context, rootNavigator: true)
-          .push<AssignmentResult>(MaterialPageRoute(builder: (_) => AssignmentPage(receipt: state.parsedReceipt!)))
+          .push<AssignmentResult>(
+            MaterialPageRoute(
+              builder: (_) => AssignmentPage(receipt: state.parsedReceipt!),
+            ),
+          )
           .then((result) {
             if (result != null && mounted) {
               _applyAssignmentResult(context, result);
@@ -138,9 +152,12 @@ class _CalculatorViewState extends State<_CalculatorView> {
           });
     }
     if (state.status == ScannerStatus.error && state.errorMessage != null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(state.errorMessage!), backgroundColor: AppTheme.error));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(state.errorMessage!),
+          backgroundColor: AppTheme.error,
+        ),
+      );
     }
   }
 
@@ -149,7 +166,9 @@ class _CalculatorViewState extends State<_CalculatorView> {
     for (final order in result.orders) {
       calc.add(AddPersonOrder(name: order.name, items: order.items));
     }
-    if (result.tax != null || result.deliveryFee != null || result.discount != null) {
+    if (result.tax != null ||
+        result.deliveryFee != null ||
+        result.discount != null) {
       calc.add(
         UpdateFeesAndDiscount(
           taxFee: result.tax ?? 0,
@@ -161,9 +180,13 @@ class _CalculatorViewState extends State<_CalculatorView> {
     }
     calc.add(const CalculateBillEvent());
     final total = result.orders.fold<int>(0, (s, o) => s + o.items.length);
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('${result.orders.length} orang dengan $total item berhasil ditambahkan.')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          '${result.orders.length} orang dengan $total item berhasil ditambahkan.',
+        ),
+      ),
+    );
   }
 }
 
@@ -186,39 +209,41 @@ class _CalculatorHeader extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            gradient: LinearGradient(colors: AppTheme.primaryGradient),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(9),
             boxShadow: [AppTheme.shadowSm],
           ),
-          child: const Icon(Icons.receipt_long, color: Colors.white, size: 20),
+          child: Image.asset(
+            'assets/branding/app_icon_rounded.png',
+            width: 40,
+            height: 40,
+            filterQuality: FilterQuality.high,
+          ),
         ),
         const SizedBox(width: AppTheme.spaceMd),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Hitung Patungan', style: AppTheme.heading3, maxLines: 1, overflow: TextOverflow.ellipsis),
+              Text(
+                'Hitung Patungan',
+                style: AppTheme.heading3,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
               BlocBuilder<CalculatorBloc, CalculatorState>(
                 builder: (context, state) {
                   final subtitle = state.orders.isEmpty
                       ? 'Yuk, mulai tambahin pesanan'
                       : '${state.orders.length} orang siap dibagi';
-                  return Text(subtitle, style: AppTheme.bodySmall, maxLines: 1, overflow: TextOverflow.ellipsis);
+                  return Text(
+                    subtitle,
+                    style: AppTheme.bodySmall,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  );
                 },
               ),
             ],
-          ),
-        ),
-        TourTarget(
-          tourKey: ShowcaseTour.themeKey,
-          title: 'Mode Terang / Gelap',
-          description: 'Ganti tampilan sesuai selera atau kondisi cahaya.',
-          radius: AppTheme.radiusFull,
-          child: IconButton(
-            tooltip: AppTheme.isDark ? 'Mode terang' : 'Mode gelap',
-            onPressed: ThemeController.toggle,
-            icon: Icon(AppTheme.isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined),
-            color: AppTheme.textSecondary,
           ),
         ),
         BlocBuilder<CalculatorBloc, CalculatorState>(
@@ -231,6 +256,21 @@ class _CalculatorHeader extends StatelessWidget {
               color: hasData ? AppTheme.textSecondary : AppTheme.disabledText,
             );
           },
+        ),
+        TourTarget(
+          tourKey: ShowcaseTour.settingsKey,
+          title: 'Pengaturan',
+          description: 'Atur tema terang/gelap dan ulangi panduan ini di sini.',
+          radius: AppTheme.radiusFull,
+          child: IconButton(
+            tooltip: 'Pengaturan',
+            onPressed: () => Navigator.of(
+              context,
+              rootNavigator: true,
+            ).push(MaterialPageRoute(builder: (_) => const SettingsPage())),
+            icon: const Icon(Icons.settings_outlined),
+            color: AppTheme.textSecondary,
+          ),
         ),
       ],
     );
@@ -261,7 +301,10 @@ class _SectionHeader extends StatelessWidget {
         Container(
           width: 36,
           height: 36,
-          decoration: BoxDecoration(color: iconBg, borderRadius: BorderRadius.circular(11)),
+          decoration: BoxDecoration(
+            color: iconBg,
+            borderRadius: BorderRadius.circular(11),
+          ),
           child: Icon(icon, color: iconColor, size: 18),
         ),
         const SizedBox(width: AppTheme.spaceMd),
@@ -270,7 +313,10 @@ class _SectionHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(title, style: AppTheme.heading3),
-              if (subtitle != null) ...[const SizedBox(height: 1), Text(subtitle!, style: AppTheme.bodySmall)],
+              if (subtitle != null) ...[
+                const SizedBox(height: 1),
+                Text(subtitle!, style: AppTheme.bodySmall),
+              ],
             ],
           ),
         ),
@@ -288,7 +334,8 @@ class _ContinueButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<CalculatorBloc, CalculatorState>(
       builder: (context, state) {
-        final hasResult = state.status == CalculatorStatus.calculated && state.result != null;
+        final hasResult =
+            state.status == CalculatorStatus.calculated && state.result != null;
         return SizedBox(
           height: 52,
           child: ElevatedButton.icon(
@@ -301,7 +348,12 @@ class _ContinueButton extends StatelessWidget {
               ),
             ),
             onPressed: state.orders.isEmpty ? null : onTap,
-            icon: Icon(hasResult ? Icons.receipt_long_rounded : Icons.arrow_forward_rounded, size: 20),
+            icon: Icon(
+              hasResult
+                  ? Icons.receipt_long_rounded
+                  : Icons.arrow_forward_rounded,
+              size: 20,
+            ),
             label: Text(
               hasResult
                   ? 'Lihat Ringkasan · ${AppTheme.formatRupiah(state.result!.grandTotal)}'

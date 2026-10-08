@@ -10,8 +10,6 @@ class Person extends Equatable {
   List<Object?> get props => [id, name];
 }
 
-/// Satu item bisa dimiliki beberapa orang sekaligus (patungan per item);
-/// harganya dibagi rata ke semua yang ikut.
 class AssignableItem extends Equatable {
   final String id;
   final String name;

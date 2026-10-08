@@ -207,8 +207,6 @@ class ReceiptAssignmentBloc extends Bloc<AssignmentEvent, AssignmentState> {
           personItems.add(OrderItem(name: item.name, price: item.price));
           continue;
         }
-        // Bagi rata; sisa pembulatan dibebankan ke orang-orang pertama di
-        // daftar supaya total semua bagian tetap sama persis dengan harga item.
         final base = (item.price / count).floorToDouble();
         final remainder = (item.price - base * count).round();
         final idx = item.assignedPersonIds.indexOf(person.id);

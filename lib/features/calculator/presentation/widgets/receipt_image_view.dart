@@ -5,11 +5,6 @@ import '../../domain/entities/bill_result.dart';
 import '../../domain/entities/calculated_bill.dart';
 import '../../domain/entities/person_order.dart';
 
-/// Struk patungan bergaya nota panjang. Dipakai sebagai preview di sheet hasil
-/// sekaligus sumber gambar yang dibagikan, jadi tampilannya selalu sama.
-///
-/// Warna sengaja tetap (tidak mengikuti mode gelap/terang aplikasi) karena ini
-/// "kertas" struk.
 class ReceiptImageView extends StatelessWidget {
   static const String logoDark = 'assets/branding/logo_horizontal.png';
   static const String logoLight = 'assets/branding/logo_horizontal_light.png';
@@ -90,8 +85,6 @@ class ReceiptImageView extends StatelessWidget {
     );
   }
 
-  // ── Header ────────────────────────────────────────────────────────────────
-
   Widget _header() {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -130,8 +123,6 @@ class ReceiptImageView extends StatelessWidget {
       ],
     );
   }
-
-  // ── Ringkasan ─────────────────────────────────────────────────────────────
 
   Widget _summary() {
     return Container(
@@ -222,8 +213,6 @@ class ReceiptImageView extends StatelessWidget {
       ],
     );
   }
-
-  // ── Kartu per orang ───────────────────────────────────────────────────────
 
   Widget _personCard(int index, CalculatedBill bill) {
     final matches = orders.where((o) => o.id == bill.personId);
@@ -346,8 +335,6 @@ class ReceiptImageView extends StatelessWidget {
     );
   }
 
-  // ── Footer ────────────────────────────────────────────────────────────────
-
   Widget _footer() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(18, 10, 18, 30),
@@ -370,8 +357,6 @@ class ReceiptImageView extends StatelessWidget {
       ),
     );
   }
-
-  // ── Util ──────────────────────────────────────────────────────────────────
 
   Widget _row(
     String label,
@@ -459,7 +444,6 @@ class _DashedPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-/// Tepi bawah bergerigi seperti sobekan struk.
 class _ZigZagBottomClipper extends CustomClipper<Path> {
   const _ZigZagBottomClipper();
 
