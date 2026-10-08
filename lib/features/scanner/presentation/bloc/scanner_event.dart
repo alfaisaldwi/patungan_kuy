@@ -8,7 +8,6 @@ sealed class ScannerEvent extends Equatable {
 }
 
 class PickAndScanImage extends ScannerEvent {
-
   final bool fromCamera;
 
   const PickAndScanImage({this.fromCamera = false});

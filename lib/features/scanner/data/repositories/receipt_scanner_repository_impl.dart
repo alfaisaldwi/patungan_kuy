@@ -18,18 +18,28 @@ class ReceiptScannerRepositoryImpl implements ReceiptScannerRepository {
 
   static final RegExp _rpPricePattern = RegExp(r'[Rr][Pp]\s*([\d\.]+)');
 
-  static final RegExp _numericPricePattern = RegExp(r'\b(\d{1,3}(?:\.\d{3})+(?:[.,]\d{1,3})?)\b');
+  static final RegExp _numericPricePattern = RegExp(
+    r'\b(\d{1,3}(?:\.\d{3})+(?:[.,]\d{1,3})?)\b',
+  );
 
-  static final RegExp _negativePricePattern = RegExp(r'-\s*(?:[Rr][Pp]\s*)?([\d\.]+)');
+  static final RegExp _negativePricePattern = RegExp(
+    r'-\s*(?:[Rr][Pp]\s*)?([\d\.]+)',
+  );
 
   static final RegExp _feeLabelPattern = RegExp(
     r'pengiriman|layanan|pengemasan|ongkir|antar|delivery|platform|aplikasi|penanganan',
     caseSensitive: false,
   );
 
-  static final RegExp _discountLabelPattern = RegExp(r'voucher|diskon|discount|promo|potongan', caseSensitive: false);
+  static final RegExp _discountLabelPattern = RegExp(
+    r'voucher|diskon|discount|promo|potongan',
+    caseSensitive: false,
+  );
 
-  static final RegExp _subtotalLabelPattern = RegExp(r'subtotal|sub\s*total|harga\s*makanan', caseSensitive: false);
+  static final RegExp _subtotalLabelPattern = RegExp(
+    r'subtotal|sub\s*total|harga\s*makanan',
+    caseSensitive: false,
+  );
 
   static final RegExp _totalLabelPattern = RegExp(
     r'^total\b|pembayaran|grand\s*total|tagihan|total\s*pesanan|total\s*bayar',
@@ -37,19 +47,24 @@ class ReceiptScannerRepositoryImpl implements ReceiptScannerRepository {
   );
 
   @override
-  Future<Either<Failure, ParsedReceipt>> extractFromImage(String imagePath) async {
+  Future<Either<Failure, ParsedReceipt>> extractFromImage(
+    String imagePath,
+  ) async {
     try {
-
       final recognizedText = await _dataSource.recognizeText(imagePath);
 
       final lines = _extractLines(recognizedText);
       if (lines.isEmpty) {
-        return const Left(CalculatorFailure('No text detected in the image. Try a clearer photo.'));
+        return const Left(
+          CalculatorFailure(
+            'Nggak ada teks yang kebaca. Coba foto yang lebih jelas, ya.',
+          ),
+        );
       }
 
       return _buildParsedReceipt(lines);
     } catch (e) {
-      return Left(CalculatorFailure('Failed to scan receipt: $e'));
+      return Left(CalculatorFailure('Gagal scan struk: $e'));
     }
   }
 
@@ -75,7 +90,9 @@ class ReceiptScannerRepositoryImpl implements ReceiptScannerRepository {
         if (pendingLabel != null) {
           switch (pendingLabel) {
             case _PendingLabel.subtotal:
-              if (!hasNegative && priceOnLine != null) subtotal = (subtotal ?? 0) + priceOnLine;
+              if (!hasNegative && priceOnLine != null) {
+                subtotal = (subtotal ?? 0) + priceOnLine;
+              }
               break;
             case _PendingLabel.discount:
               totalDiscount += priceOnLine ?? 0;
@@ -105,8 +122,12 @@ class ReceiptScannerRepositoryImpl implements ReceiptScannerRepository {
 
       final itemMatch = _itemPattern.firstMatch(trimmed);
       if (itemMatch != null) {
-
-        _flushPendingItem(orderItems, pendingItemName, pendingQuantity, pendingItemPrice);
+        _flushPendingItem(
+          orderItems,
+          pendingItemName,
+          pendingQuantity,
+          pendingItemPrice,
+        );
 
         pendingLabel = null;
         pendingQuantity = int.tryParse(itemMatch.group(1)!) ?? 1;
@@ -125,8 +146,16 @@ class ReceiptScannerRepositoryImpl implements ReceiptScannerRepository {
           _feeLabelPattern.hasMatch(trimmed) ||
           _totalLabelPattern.hasMatch(trimmed);
 
-      if (isSummary && pendingItemName != null && pendingQuantity > 0 && pendingItemPrice != null) {
-        _flushPendingItem(orderItems, pendingItemName, pendingQuantity, pendingItemPrice);
+      if (isSummary &&
+          pendingItemName != null &&
+          pendingQuantity > 0 &&
+          pendingItemPrice != null) {
+        _flushPendingItem(
+          orderItems,
+          pendingItemName,
+          pendingQuantity,
+          pendingItemPrice,
+        );
         pendingItemName = null;
         pendingItemPrice = null;
         pendingQuantity = 0;
@@ -172,9 +201,16 @@ class ReceiptScannerRepositoryImpl implements ReceiptScannerRepository {
       pendingLabel = null;
     }
 
-    _flushPendingItem(orderItems, pendingItemName, pendingQuantity, pendingItemPrice);
+    _flushPendingItem(
+      orderItems,
+      pendingItemName,
+      pendingQuantity,
+      pendingItemPrice,
+    );
 
-    final orders = orderItems.map((item) => ExtractedOrder(name: item.name, items: [item])).toList();
+    final orders = orderItems
+        .map((item) => ExtractedOrder(name: item.name, items: [item]))
+        .toList();
 
     return Right(
       ParsedReceipt(
@@ -187,7 +223,6 @@ class ReceiptScannerRepositoryImpl implements ReceiptScannerRepository {
   }
 
   double? _extractPriceFromLine(String line) {
-
     final rpMatch = _rpPricePattern.allMatches(line).toList();
     if (rpMatch.isNotEmpty) {
       final raw = rpMatch.last.group(1)!;
@@ -211,7 +246,6 @@ class ReceiptScannerRepositoryImpl implements ReceiptScannerRepository {
   }
 
   String _stripTrailingPrice(String name) {
-
     var cleaned = name.replaceAll(_rpPricePattern, '').trim();
 
     cleaned = cleaned.replaceAll(_numericPricePattern, '').trim();
@@ -220,7 +254,12 @@ class ReceiptScannerRepositoryImpl implements ReceiptScannerRepository {
     return cleaned;
   }
 
-  void _flushPendingItem(List<OrderItem> items, String? name, int qty, double? price) {
+  void _flushPendingItem(
+    List<OrderItem> items,
+    String? name,
+    int qty,
+    double? price,
+  ) {
     if (name == null || qty <= 0) return;
     final p = price ?? 0;
     final perItem = p / qty;
@@ -294,7 +333,9 @@ class ReceiptScannerRepositoryImpl implements ReceiptScannerRepository {
     if (allTextLines.isEmpty) return mergedLines;
 
     List<TextLine> currentGroup = [allTextLines.first];
-    double currentCenter = allTextLines.first.boundingBox.top + (allTextLines.first.boundingBox.height / 2);
+    double currentCenter =
+        allTextLines.first.boundingBox.top +
+        (allTextLines.first.boundingBox.height / 2);
 
     double threshold = allTextLines.first.boundingBox.height * 0.5;
 
@@ -303,11 +344,11 @@ class ReceiptScannerRepositoryImpl implements ReceiptScannerRepository {
       final center = line.boundingBox.top + (line.boundingBox.height / 2);
 
       if ((center - currentCenter).abs() < threshold) {
-
         currentGroup.add(line);
       } else {
-
-        currentGroup.sort((a, b) => a.boundingBox.left.compareTo(b.boundingBox.left));
+        currentGroup.sort(
+          (a, b) => a.boundingBox.left.compareTo(b.boundingBox.left),
+        );
         mergedLines.add(currentGroup.map((e) => e.text).join(' '));
 
         currentGroup = [line];
@@ -317,7 +358,9 @@ class ReceiptScannerRepositoryImpl implements ReceiptScannerRepository {
     }
 
     if (currentGroup.isNotEmpty) {
-      currentGroup.sort((a, b) => a.boundingBox.left.compareTo(b.boundingBox.left));
+      currentGroup.sort(
+        (a, b) => a.boundingBox.left.compareTo(b.boundingBox.left),
+      );
       mergedLines.add(currentGroup.map((e) => e.text).join(' '));
     }
 

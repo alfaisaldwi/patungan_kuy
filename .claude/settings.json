@@ -2,7 +2,13 @@
   "permissions": {
     "allow": [
       "Bash(flutter test *)",
-      "Bash(git stash *)"
+      "Bash(git stash *)",
+      "Bash(dart format *)",
+      "Bash(flutter --version)",
+      "Bash(flutter channel *)",
+      "Bash(flutter doctor *)",
+      "Bash(P=\"/Users/cititexkedoya/.pub-cache/hosted/pub.dev/liquid_glass_widgets-0.29.2\"; sed -n '1297,1360p' \"$P/lib/widgets/surfaces/glass_tab_bar.dart\")",
+      "Read(//Users/cititexkedoya/.pub-cache/hosted/pub.dev/liquid_glass_widgets-0.29.2/lib/widgets/surfaces/**)"
     ]
   }
 }

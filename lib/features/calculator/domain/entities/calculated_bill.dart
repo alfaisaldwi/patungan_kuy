@@ -19,11 +19,11 @@ class CalculatedBill extends Equatable {
 
   @override
   List<Object?> get props => [
-        personId,
-        name,
-        originalPrice,
-        proportionalFee,
-        proportionalDiscount,
-        finalPayable,
-      ];
+    personId,
+    name,
+    originalPrice,
+    proportionalFee,
+    proportionalDiscount,
+    finalPayable,
+  ];
 }

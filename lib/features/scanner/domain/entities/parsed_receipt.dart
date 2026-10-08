@@ -28,5 +28,11 @@ class ParsedReceipt extends Equatable {
   });
 
   @override
-  List<Object?> get props => [orders, detectedSubtotal, detectedTax, detectedDeliveryFee, detectedDiscount];
+  List<Object?> get props => [
+    orders,
+    detectedSubtotal,
+    detectedTax,
+    detectedDeliveryFee,
+    detectedDiscount,
+  ];
 }

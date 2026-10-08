@@ -22,7 +22,11 @@ class UpdatePersonOrder extends CalculatorEvent {
   final String name;
   final List<OrderItem> items;
 
-  const UpdatePersonOrder({required this.id, required this.name, required this.items});
+  const UpdatePersonOrder({
+    required this.id,
+    required this.name,
+    required this.items,
+  });
 
   @override
   List<Object?> get props => [id, name, items];
@@ -35,6 +39,16 @@ class RemovePersonOrder extends CalculatorEvent {
 
   @override
   List<Object?> get props => [id];
+}
+
+class RestorePersonOrder extends CalculatorEvent {
+  final PersonOrder order;
+  final int index;
+
+  const RestorePersonOrder({required this.order, required this.index});
+
+  @override
+  List<Object?> get props => [order, index];
 }
 
 class UpdateFeesAndDiscount extends CalculatorEvent {
@@ -51,7 +65,12 @@ class UpdateFeesAndDiscount extends CalculatorEvent {
   });
 
   @override
-  List<Object?> get props => [taxFee, deliveryFee, discountAmount, isDiscountPercentage];
+  List<Object?> get props => [
+    taxFee,
+    deliveryFee,
+    discountAmount,
+    isDiscountPercentage,
+  ];
 }
 
 class CalculateBillEvent extends CalculatorEvent {

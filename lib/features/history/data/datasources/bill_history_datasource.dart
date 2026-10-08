@@ -8,7 +8,6 @@ import '../models/bill_history_model.dart';
 class BillHistoryDataSource {
   static const String boxName = 'bill_history';
 
-  /// Oldest entries are evicted once the box grows past this size.
   static const int maxEntries = 100;
 
   final Box<String> _box;
@@ -16,10 +15,15 @@ class BillHistoryDataSource {
   BillHistoryDataSource(this._box);
 
   List<BillHistory> getAll() {
-    final entries = _box.values
-        .map((raw) => BillHistoryModel.fromJson(jsonDecode(raw) as Map<String, dynamic>))
-        .toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    final entries =
+        _box.values
+            .map(
+              (raw) => BillHistoryModel.fromJson(
+                jsonDecode(raw) as Map<String, dynamic>,
+              ),
+            )
+            .toList()
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return entries;
   }
 

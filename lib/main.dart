@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import 'core/onboarding/showcase_tour.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_controller.dart';
-import 'features/calculator/presentation/pages/calculator_page.dart';
+import 'features/home/presentation/pages/home_page.dart';
+import 'features/splash/presentation/pages/splash_page.dart';
 import 'injection_container.dart';
 
 void main() async {
@@ -12,8 +14,22 @@ void main() async {
   runApp(const PatunganKuyApp());
 }
 
-class PatunganKuyApp extends StatelessWidget {
+class PatunganKuyApp extends StatefulWidget {
   const PatunganKuyApp({super.key});
+
+  @override
+  State<PatunganKuyApp> createState() => _PatunganKuyAppState();
+}
+
+class _PatunganKuyAppState extends State<PatunganKuyApp> {
+  bool _homeReady = false;
+  bool _splashDone = false;
+
+  @override
+  void initState() {
+    super.initState();
+    ShowcaseTour.register();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,10 +40,19 @@ class PatunganKuyApp extends StatelessWidget {
           title: 'PatunganKuy',
           debugShowCheckedModeBanner: false,
           theme: _buildTheme(isDark),
-          // Re-inflate the whole tree on toggle so widgets reading AppTheme
-          // getters pick up the new palette. Bloc state survives because the
-          // blocs are app-lifetime singletons provided via BlocProvider.value.
-          home: KeyedSubtree(key: ValueKey(isDark), child: const CalculatorPage()),
+          home: Stack(
+            fit: StackFit.expand,
+            children: [
+              if (_homeReady)
+                KeyedSubtree(key: ValueKey(isDark), child: const HomePage()),
+              if (!_splashDone)
+                SplashPage(
+                  key: const ValueKey('splash'),
+                  onReveal: () => setState(() => _homeReady = true),
+                  onFinished: () => setState(() => _splashDone = true),
+                ),
+            ],
+          ),
         );
       },
     );
@@ -39,9 +64,13 @@ class PatunganKuyApp extends StatelessWidget {
       useMaterial3: true,
       brightness: brightness,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: AppTheme.primary,
+        seedColor: AppTheme.brandYellow,
         primary: AppTheme.primary,
+        onPrimary: AppTheme.textOnPrimary,
+        primaryContainer: AppTheme.primaryLight,
+        onPrimaryContainer: AppTheme.textPrimary,
         secondary: AppTheme.accent,
+        tertiary: AppTheme.brandYellow,
         surface: AppTheme.surface,
         error: AppTheme.error,
         brightness: brightness,
@@ -58,13 +87,18 @@ class PatunganKuyApp extends StatelessWidget {
       cardTheme: CardThemeData(
         color: AppTheme.surface,
         elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusLg)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+        ),
         margin: const EdgeInsets.symmetric(vertical: AppTheme.spaceSm),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppTheme.background,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppTheme.radiusMd),
           borderSide: BorderSide(color: AppTheme.border),
@@ -75,7 +109,7 @@ class PatunganKuyApp extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-          borderSide: const BorderSide(color: AppTheme.primary, width: 1.5),
+          borderSide: BorderSide(color: AppTheme.primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppTheme.radiusMd),
@@ -84,16 +118,40 @@ class PatunganKuyApp extends StatelessWidget {
         labelStyle: AppTheme.bodySmall.copyWith(color: AppTheme.textSecondary),
         hintStyle: TextStyle(color: AppTheme.textHint, fontSize: 14),
       ),
-      elevatedButtonTheme: ElevatedButtonThemeData(style: AppTheme.primaryButton),
-      outlinedButtonTheme: OutlinedButtonThemeData(style: AppTheme.outlinedButton),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: AppTheme.primaryButton,
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: AppTheme.outlinedButton,
+      ),
+      checkboxTheme: CheckboxThemeData(
+        checkColor: WidgetStatePropertyAll(AppTheme.textOnPrimary),
+        side: BorderSide(color: AppTheme.textHint, width: 1.5),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: AppTheme.primary,
+      ),
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: AppTheme.primary,
+        selectionColor: AppTheme.brandYellow.withAlpha(110),
+        selectionHandleColor: AppTheme.primary,
+      ),
       snackBarTheme: SnackBarThemeData(
+        backgroundColor: AppTheme.brandNavy,
+        contentTextStyle: const TextStyle(color: Colors.white, fontSize: 14),
+        actionTextColor: AppTheme.brandYellow,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusMd)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+        ),
       ),
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: AppTheme.surface,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(AppTheme.radiusXl)),
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppTheme.radiusXl),
+          ),
         ),
       ),
     );

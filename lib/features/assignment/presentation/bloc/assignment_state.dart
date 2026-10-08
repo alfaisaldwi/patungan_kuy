@@ -11,6 +11,7 @@ class AssignmentState extends Equatable {
   final List<PersonOrder>? finalizedOrders;
 
   final double? receiptSubtotal;
+  final double? receiptTax;
   final double? receiptDeliveryFee;
   final double? receiptDiscount;
 
@@ -21,6 +22,7 @@ class AssignmentState extends Equatable {
     this.errorMessage,
     this.finalizedOrders,
     this.receiptSubtotal,
+    this.receiptTax,
     this.receiptDeliveryFee,
     this.receiptDiscount,
   });
@@ -32,6 +34,7 @@ class AssignmentState extends Equatable {
     String? errorMessage,
     List<PersonOrder>? finalizedOrders,
     double? receiptSubtotal,
+    double? receiptTax,
     double? receiptDeliveryFee,
     double? receiptDiscount,
     bool clearError = false,
@@ -42,17 +45,24 @@ class AssignmentState extends Equatable {
       items: items ?? this.items,
       status: status ?? this.status,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
-      finalizedOrders: clearFinalized ? null : (finalizedOrders ?? this.finalizedOrders),
+      finalizedOrders: clearFinalized
+          ? null
+          : (finalizedOrders ?? this.finalizedOrders),
       receiptSubtotal: receiptSubtotal ?? this.receiptSubtotal,
+      receiptTax: receiptTax ?? this.receiptTax,
       receiptDeliveryFee: receiptDeliveryFee ?? this.receiptDeliveryFee,
       receiptDiscount: receiptDiscount ?? this.receiptDiscount,
     );
   }
 
-  double get unassignedTotal => items.where((i) => i.isUnassigned).fold(0, (s, i) => s + i.price);
+  double get unassignedTotal =>
+      items.where((i) => i.isUnassigned).fold(0, (s, i) => s + i.price);
 
-  double assignedTotalFor(String personId) =>
-      items.where((i) => i.isAssignedTo(personId)).fold(0, (s, i) => s + i.price);
+  double get itemsTotal => items.fold(0, (s, i) => s + i.price);
+
+  double assignedTotalFor(String personId) => items
+      .where((i) => i.isAssignedTo(personId))
+      .fold(0, (s, i) => s + i.sharePrice);
 
   @override
   List<Object?> get props => [
@@ -62,6 +72,7 @@ class AssignmentState extends Equatable {
     errorMessage,
     finalizedOrders,
     receiptSubtotal,
+    receiptTax,
     receiptDeliveryFee,
     receiptDiscount,
   ];

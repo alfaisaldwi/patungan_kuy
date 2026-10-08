@@ -21,11 +21,11 @@ class BillResult extends Equatable {
 
   @override
   List<Object?> get props => [
-        calculatedBills,
-        totalBase,
-        totalFees,
-        totalDiscount,
-        grandTotal,
-        calculatedAt,
-      ];
+    calculatedBills,
+    totalBase,
+    totalFees,
+    totalDiscount,
+    grandTotal,
+    calculatedAt,
+  ];
 }

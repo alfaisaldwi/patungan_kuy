@@ -15,7 +15,11 @@ class PersonOrder extends Equatable {
   final String name;
   final List<OrderItem> items;
 
-  const PersonOrder({required this.id, required this.name, required this.items});
+  const PersonOrder({
+    required this.id,
+    required this.name,
+    required this.items,
+  });
 
   double get totalPrice => items.fold(0, (sum, item) => sum + item.price);
 

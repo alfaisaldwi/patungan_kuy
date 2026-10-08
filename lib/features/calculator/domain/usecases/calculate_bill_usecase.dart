@@ -28,34 +28,48 @@ class CalculateBillUseCase {
   CalculateBillUseCase(this.repository);
 
   Either<Failure, BillResult> call(CalculateBillParams params) {
-
     if (params.orders.isEmpty) {
-      return const Left(CalculatorFailure('At least one person order is required.'));
+      return const Left(
+        CalculatorFailure('Tambahin minimal satu orang dulu, ya.'),
+      );
     }
 
     for (final order in params.orders) {
       if (order.name.trim().isEmpty) {
-        return const Left(CalculatorFailure('All person names must be non-empty.'));
+        return const Left(
+          CalculatorFailure('Nama tiap orang nggak boleh kosong.'),
+        );
       }
       if (order.items.isEmpty) {
-        return Left(CalculatorFailure('"${order.name}" must have at least one item.'));
+        return Left(
+          CalculatorFailure('"${order.name}" harus punya minimal satu item.'),
+        );
       }
       for (final item in order.items) {
         if (item.price <= 0) {
-          return Left(CalculatorFailure('Item price for "${order.name}" must be greater than 0.'));
+          return Left(
+            CalculatorFailure(
+              'Harga item punya "${order.name}" harus lebih dari 0.',
+            ),
+          );
         }
       }
     }
 
     if (params.taxFee < 0 || params.deliveryFee < 0) {
-      return const Left(CalculatorFailure('Tax and delivery fees cannot be negative.'));
+      return const Left(
+        CalculatorFailure('Pajak dan ongkir nggak boleh minus.'),
+      );
     }
 
     if (params.discountAmount < 0) {
-      return const Left(CalculatorFailure('Discount amount cannot be negative.'));
+      return const Left(CalculatorFailure('Diskon nggak boleh minus.'));
     }
 
-    final totalBase = params.orders.fold<double>(0, (sum, order) => sum + order.totalPrice);
+    final totalBase = params.orders.fold<double>(
+      0,
+      (sum, order) => sum + order.totalPrice,
+    );
 
     final totalFees = params.taxFee + params.deliveryFee;
 
@@ -64,12 +78,12 @@ class CalculateBillUseCase {
         : params.discountAmount;
 
     final calculatedBills = params.orders.map((order) {
-
       final proportion = totalBase > 0 ? order.totalPrice / totalBase : 0.0;
 
       final proportionalFee = proportion * totalFees;
       final proportionalDiscount = proportion * totalDiscount;
-      final finalPayable = order.totalPrice + proportionalFee - proportionalDiscount;
+      final finalPayable =
+          order.totalPrice + proportionalFee - proportionalDiscount;
 
       return CalculatedBill(
         personId: order.id,
@@ -81,7 +95,10 @@ class CalculateBillUseCase {
       );
     }).toList();
 
-    final grandTotal = calculatedBills.fold<double>(0, (sum, bill) => sum + bill.finalPayable);
+    final grandTotal = calculatedBills.fold<double>(
+      0,
+      (sum, bill) => sum + bill.finalPayable,
+    );
 
     return Right(
       BillResult(

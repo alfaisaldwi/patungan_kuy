@@ -20,6 +20,16 @@ class DeleteHistoryEntry extends HistoryEvent {
   List<Object?> get props => [id];
 }
 
+class RestoreHistoryEntry extends HistoryEvent {
+  final BillHistory entry;
+  final int index;
+
+  const RestoreHistoryEntry({required this.entry, required this.index});
+
+  @override
+  List<Object?> get props => [entry, index];
+}
+
 class ClearHistory extends HistoryEvent {
   const ClearHistory();
 }

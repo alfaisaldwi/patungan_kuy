@@ -26,39 +26,60 @@ final sl = GetIt.instance;
 Future<void> initDependencies() async {
   final historyBox = await _openHistoryBox();
 
-  sl.registerLazySingleton<CalculatorRepository>(() => CalculatorRepositoryImpl());
+  sl.registerLazySingleton<CalculatorRepository>(
+    () => CalculatorRepositoryImpl(),
+  );
 
-  sl.registerLazySingleton<ReceiptScannerDataSource>(() => ReceiptScannerDataSource());
+  sl.registerLazySingleton<ReceiptScannerDataSource>(
+    () => ReceiptScannerDataSource(),
+  );
   sl.registerLazySingleton<ReceiptScannerRepository>(
     () => ReceiptScannerRepositoryImpl(sl<ReceiptScannerDataSource>()),
   );
 
-  sl.registerLazySingleton<BillHistoryDataSource>(() => BillHistoryDataSource(historyBox));
-  sl.registerLazySingleton<BillHistoryRepository>(() => BillHistoryRepositoryImpl(sl<BillHistoryDataSource>()));
+  sl.registerLazySingleton<BillHistoryDataSource>(
+    () => BillHistoryDataSource(historyBox),
+  );
+  sl.registerLazySingleton<BillHistoryRepository>(
+    () => BillHistoryRepositoryImpl(sl<BillHistoryDataSource>()),
+  );
 
-  sl.registerLazySingleton<CalculateBillUseCase>(() => CalculateBillUseCase(sl<CalculatorRepository>()));
-  sl.registerLazySingleton<ExtractReceiptDataUseCase>(() => ExtractReceiptDataUseCase(sl<ReceiptScannerRepository>()));
-  sl.registerLazySingleton<GetBillHistoryUseCase>(() => GetBillHistoryUseCase(sl<BillHistoryRepository>()));
-  sl.registerLazySingleton<SaveBillHistoryUseCase>(() => SaveBillHistoryUseCase(sl<BillHistoryRepository>()));
-  sl.registerLazySingleton<DeleteBillHistoryUseCase>(() => DeleteBillHistoryUseCase(sl<BillHistoryRepository>()));
-  sl.registerLazySingleton<ClearBillHistoryUseCase>(() => ClearBillHistoryUseCase(sl<BillHistoryRepository>()));
+  sl.registerLazySingleton<CalculateBillUseCase>(
+    () => CalculateBillUseCase(sl<CalculatorRepository>()),
+  );
+  sl.registerLazySingleton<ExtractReceiptDataUseCase>(
+    () => ExtractReceiptDataUseCase(sl<ReceiptScannerRepository>()),
+  );
+  sl.registerLazySingleton<GetBillHistoryUseCase>(
+    () => GetBillHistoryUseCase(sl<BillHistoryRepository>()),
+  );
+  sl.registerLazySingleton<SaveBillHistoryUseCase>(
+    () => SaveBillHistoryUseCase(sl<BillHistoryRepository>()),
+  );
+  sl.registerLazySingleton<DeleteBillHistoryUseCase>(
+    () => DeleteBillHistoryUseCase(sl<BillHistoryRepository>()),
+  );
+  sl.registerLazySingleton<ClearBillHistoryUseCase>(
+    () => ClearBillHistoryUseCase(sl<BillHistoryRepository>()),
+  );
 
-  // App-lifetime singletons so bloc state survives full re-inflation of the
-  // widget tree (e.g. when the theme mode is toggled).
   sl.registerLazySingleton<CalculatorBloc>(
     () => CalculatorBloc(
       calculateBillUseCase: sl<CalculateBillUseCase>(),
       saveBillHistoryUseCase: sl<SaveBillHistoryUseCase>(),
     ),
   );
-  sl.registerLazySingleton<ScannerBloc>(() => ScannerBloc(extractReceiptDataUseCase: sl<ExtractReceiptDataUseCase>()));
+  sl.registerLazySingleton<ScannerBloc>(
+    () =>
+        ScannerBloc(extractReceiptDataUseCase: sl<ExtractReceiptDataUseCase>()),
+  );
 
-  // Page-scoped: HistoryPage creates and closes its own instance.
   sl.registerFactory<HistoryBloc>(
     () => HistoryBloc(
       getBillHistoryUseCase: sl<GetBillHistoryUseCase>(),
       deleteBillHistoryUseCase: sl<DeleteBillHistoryUseCase>(),
       clearBillHistoryUseCase: sl<ClearBillHistoryUseCase>(),
+      saveBillHistoryUseCase: sl<SaveBillHistoryUseCase>(),
     ),
   );
 }
@@ -67,8 +88,6 @@ Future<Box<String>> _openHistoryBox() async {
   try {
     await Hive.initFlutter();
   } catch (_) {
-    // path_provider is unavailable in unit/widget tests; fall back to a
-    // temporary directory so Hive still works.
     Hive.init(Directory.systemTemp.createTempSync('patungan_kuy_hive').path);
   }
   return Hive.openBox<String>(BillHistoryDataSource.boxName);
