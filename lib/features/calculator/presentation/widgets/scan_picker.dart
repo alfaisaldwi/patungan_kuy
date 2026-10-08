@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../scanner/presentation/bloc/scanner_bloc.dart';
+import 'receipt_examples_sheet.dart';
 
 void showScanPicker(BuildContext context) {
   showModalBottomSheet(
@@ -76,6 +77,32 @@ void showScanPicker(BuildContext context) {
               Navigator.pop(context);
               context.read<ScannerBloc>().add(const PickAndScanImage());
             },
+          ),
+          const Divider(indent: 56),
+          ListTile(
+            leading: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: AppTheme.successLight,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.receipt_long_rounded,
+                color: AppTheme.success,
+                size: 20,
+              ),
+            ),
+            title: Text('Lihat Contoh Struk', style: AppTheme.body),
+            subtitle: Text(
+              'Biar tau struk kayak gimana yang bisa di-scan',
+              style: AppTheme.bodySmall,
+            ),
+            trailing: Icon(
+              Icons.chevron_right_rounded,
+              color: AppTheme.textHint,
+            ),
+            onTap: () => showReceiptExamples(context),
           ),
         ],
       ),

@@ -240,6 +240,10 @@ class _CalculatorHeader extends StatelessWidget {
             final hasData = state.orders.isNotEmpty || state.result != null;
             return IconButton(
               tooltip: 'Reset',
+              visualDensity: VisualDensity.compact,
+              style: IconButton.styleFrom(
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
               onPressed: hasData ? onReset : null,
               icon: const Icon(Icons.refresh_rounded),
               color: hasData ? AppTheme.textSecondary : AppTheme.disabledText,
@@ -253,6 +257,10 @@ class _CalculatorHeader extends StatelessWidget {
           radius: AppTheme.radiusFull,
           child: IconButton(
             tooltip: 'Pengaturan',
+            visualDensity: VisualDensity.compact,
+            style: IconButton.styleFrom(
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
             onPressed: () => Navigator.of(
               context,
               rootNavigator: true,
