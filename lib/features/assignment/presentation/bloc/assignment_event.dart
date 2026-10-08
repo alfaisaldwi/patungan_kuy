@@ -78,6 +78,26 @@ class AddScannedItem extends AssignmentEvent {
   List<Object?> get props => [name, price];
 }
 
+class SplitScannedItem extends AssignmentEvent {
+  final String itemId;
+  final int parts;
+
+  const SplitScannedItem({required this.itemId, required this.parts});
+
+  @override
+  List<Object?> get props => [itemId, parts];
+}
+
+class RestoreAssignmentSnapshot extends AssignmentEvent {
+  final List<AssignableItem> items;
+  final List<Person> persons;
+
+  const RestoreAssignmentSnapshot({required this.items, required this.persons});
+
+  @override
+  List<Object?> get props => [items, persons];
+}
+
 class FinalizeAssignment extends AssignmentEvent {
   const FinalizeAssignment();
 }

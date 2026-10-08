@@ -25,6 +25,7 @@ class CalculatorBloc extends Bloc<CalculatorEvent, CalculatorState> {
     on<AddPersonOrder>(_onAddPersonOrder);
     on<UpdatePersonOrder>(_onUpdatePersonOrder);
     on<RemovePersonOrder>(_onRemovePersonOrder);
+    on<RestorePersonOrder>(_onRestorePersonOrder);
     on<UpdateFeesAndDiscount>(_onUpdateFeesAndDiscount);
     on<CalculateBillEvent>(_onCalculateBill);
     on<RestoreFromHistory>(_onRestoreFromHistory);
@@ -77,6 +78,23 @@ class CalculatorBloc extends Bloc<CalculatorEvent, CalculatorState> {
     emit(
       state.copyWith(
         orders: filteredOrders,
+        status: CalculatorStatus.initial,
+        clearResult: true,
+        clearError: true,
+      ),
+    );
+  }
+
+  void _onRestorePersonOrder(
+    RestorePersonOrder event,
+    Emitter<CalculatorState> emit,
+  ) {
+    if (state.orders.any((o) => o.id == event.order.id)) return;
+    final orders = [...state.orders];
+    orders.insert(event.index.clamp(0, orders.length), event.order);
+    emit(
+      state.copyWith(
+        orders: orders,
         status: CalculatorStatus.initial,
         clearResult: true,
         clearError: true,

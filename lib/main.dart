@@ -64,9 +64,13 @@ class _PatunganKuyAppState extends State<PatunganKuyApp> {
       useMaterial3: true,
       brightness: brightness,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: AppTheme.primary,
+        seedColor: AppTheme.brandYellow,
         primary: AppTheme.primary,
+        onPrimary: AppTheme.textOnPrimary,
+        primaryContainer: AppTheme.primaryLight,
+        onPrimaryContainer: AppTheme.textPrimary,
         secondary: AppTheme.accent,
+        tertiary: AppTheme.brandYellow,
         surface: AppTheme.surface,
         error: AppTheme.error,
         brightness: brightness,
@@ -105,7 +109,7 @@ class _PatunganKuyAppState extends State<PatunganKuyApp> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-          borderSide: const BorderSide(color: AppTheme.primary, width: 1.5),
+          borderSide: BorderSide(color: AppTheme.primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppTheme.radiusMd),
@@ -120,7 +124,23 @@ class _PatunganKuyAppState extends State<PatunganKuyApp> {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: AppTheme.outlinedButton,
       ),
+      checkboxTheme: CheckboxThemeData(
+        checkColor: WidgetStatePropertyAll(AppTheme.textOnPrimary),
+        side: BorderSide(color: AppTheme.textHint, width: 1.5),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: AppTheme.primary,
+      ),
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: AppTheme.primary,
+        selectionColor: AppTheme.brandYellow.withAlpha(110),
+        selectionHandleColor: AppTheme.primary,
+      ),
       snackBarTheme: SnackBarThemeData(
+        backgroundColor: AppTheme.brandNavy,
+        contentTextStyle: const TextStyle(color: Colors.white, fontSize: 14),
+        actionTextColor: AppTheme.brandYellow,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppTheme.radiusMd),

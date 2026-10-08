@@ -71,8 +71,8 @@ class ShowcaseTour {
   );
 
   static List<TooltipActionButton> _actions({required GlobalKey last}) {
-    const onPrimary = Colors.white;
-    final primary = AppTheme.primary;
+    const onPrimary = AppTheme.onCta;
+    const primary = AppTheme.cta;
     const pill = EdgeInsets.symmetric(horizontal: 14, vertical: 5);
     const pillText = TextStyle(
       color: onPrimary,

@@ -14,6 +14,7 @@ import '../../../history/domain/entities/bill_history.dart';
 import '../../../history/presentation/pages/history_page.dart';
 import '../../../scanner/presentation/bloc/scanner_bloc.dart';
 import '../widgets/floating_nav_bar.dart';
+import '../../../../core/widgets/app_dialog.dart';
 
 class HomePage extends StatefulWidget {
   final int initialTab;
@@ -106,27 +107,15 @@ class _HomePageState extends State<HomePage> {
     final calc = sl<CalculatorBloc>();
 
     if (calc.state.orders.isNotEmpty || calc.state.result != null) {
-      final confirmed = await showDialog<bool>(
+      final confirmed = await showAppConfirmDialog(
         context: context,
-        builder: (ctx) => AlertDialog(
-          title: Text('Muat dari Riwayat?', style: AppTheme.heading3),
-          content: Text(
+        icon: Icons.history_rounded,
+        title: 'Muat dari Riwayat?',
+        message:
             'Tagihan ini akan menggantikan ${calc.state.orders.length} pesanan yang lagi kamu isi sekarang.',
-            style: AppTheme.body,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Batal'),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Ganti'),
-            ),
-          ],
-        ),
+        confirmLabel: 'Ganti',
       );
-      if (confirmed != true) return;
+      if (!confirmed) return;
     }
 
     calc.add(RestoreFromHistory(entry: entry));

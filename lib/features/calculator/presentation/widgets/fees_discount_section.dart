@@ -247,7 +247,7 @@ class _DiscountModeToggle extends StatelessWidget {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w700,
-            color: selected ? Colors.white : AppTheme.textSecondary,
+            color: selected ? AppTheme.textOnPrimary : AppTheme.textSecondary,
           ),
         ),
       ),

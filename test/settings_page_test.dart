@@ -11,7 +11,7 @@ void main() {
   setUp(() {
     PackageInfo.setMockInitialValues(
       appName: 'PatunganKuy',
-      packageName: 'com.example.patungan_kuy',
+      packageName: 'com.elyss.patungankuy',
       version: '1.0.0',
       buildNumber: '1',
       buildSignature: '',

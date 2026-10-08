@@ -12,6 +12,7 @@ import '../bloc/calculator_bloc.dart';
 import '../widgets/add_person_form.dart';
 import '../widgets/order_list.dart';
 import 'summary_page.dart';
+import '../../../../core/widgets/app_dialog.dart';
 
 class CalculatorPage extends StatelessWidget {
   const CalculatorPage({super.key});
@@ -53,31 +54,19 @@ class _CalculatorViewState extends State<_CalculatorView> {
   void _confirmReset() {
     final state = context.read<CalculatorBloc>().state;
     if (state.orders.isEmpty && state.result == null) return;
-    showDialog<bool>(
+    final bloc = context.read<CalculatorBloc>();
+    showAppConfirmDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('Reset Semua?', style: AppTheme.heading3),
-        content: Text(
-          state.orders.isNotEmpty
-              ? 'Semua pesanan (${state.orders.length} orang) dan hasil hitungan akan dihapus.'
-              : 'Hasil hitungan akan dihapus.',
-          style: AppTheme.body,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Batal'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(ctx, true);
-              context.read<CalculatorBloc>().add(const ResetCalculator());
-            },
-            child: const Text('Reset', style: TextStyle(color: AppTheme.error)),
-          ),
-        ],
-      ),
-    );
+      icon: Icons.refresh_rounded,
+      tone: AppDialogTone.danger,
+      title: 'Reset semua?',
+      message: state.orders.isNotEmpty
+          ? 'Semua pesanan (${state.orders.length} orang) dan hasil hitungan akan dihapus.'
+          : 'Hasil hitungan akan dihapus.',
+      confirmLabel: 'Reset',
+    ).then((ok) {
+      if (ok) bloc.add(const ResetCalculator());
+    });
   }
 
   void _openSummary() {
@@ -146,7 +135,7 @@ class _CalculatorViewState extends State<_CalculatorView> {
             ),
           )
           .then((result) {
-            if (result != null && mounted) {
+            if (result != null && context.mounted) {
               _applyAssignmentResult(context, result);
             }
           });

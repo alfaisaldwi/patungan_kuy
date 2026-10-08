@@ -41,6 +41,16 @@ class RemovePersonOrder extends CalculatorEvent {
   List<Object?> get props => [id];
 }
 
+class RestorePersonOrder extends CalculatorEvent {
+  final PersonOrder order;
+  final int index;
+
+  const RestorePersonOrder({required this.order, required this.index});
+
+  @override
+  List<Object?> get props => [order, index];
+}
+
 class UpdateFeesAndDiscount extends CalculatorEvent {
   final double taxFee;
   final double deliveryFee;

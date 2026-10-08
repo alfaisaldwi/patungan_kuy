@@ -34,7 +34,7 @@ void showScanPicker(BuildContext context) {
                 color: AppTheme.primaryLight,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.camera_alt,
                 color: AppTheme.primary,
                 size: 20,
@@ -61,7 +61,7 @@ void showScanPicker(BuildContext context) {
                 color: AppTheme.accentLight,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.photo_library,
                 color: AppTheme.accent,
                 size: 20,

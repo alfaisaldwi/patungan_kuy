@@ -79,6 +79,7 @@ Future<void> initDependencies() async {
       getBillHistoryUseCase: sl<GetBillHistoryUseCase>(),
       deleteBillHistoryUseCase: sl<DeleteBillHistoryUseCase>(),
       clearBillHistoryUseCase: sl<ClearBillHistoryUseCase>(),
+      saveBillHistoryUseCase: sl<SaveBillHistoryUseCase>(),
     ),
   );
 }

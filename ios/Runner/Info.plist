@@ -66,5 +66,11 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Kamera dipakai untuk memotret struk yang mau dibagi.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Galeri dipakai untuk memilih foto struk.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Izin ini dipakai untuk menyimpan gambar struk patungan ke galeri.</string>
 </dict>
 </plist>

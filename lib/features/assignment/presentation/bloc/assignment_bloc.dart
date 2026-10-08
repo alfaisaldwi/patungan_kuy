@@ -17,6 +17,8 @@ class ReceiptAssignmentBloc extends Bloc<AssignmentEvent, AssignmentState> {
     on<UpdateScannedItem>(_onUpdateScannedItem);
     on<RemoveScannedItem>(_onRemoveScannedItem);
     on<AddScannedItem>(_onAddScannedItem);
+    on<SplitScannedItem>(_onSplitScannedItem);
+    on<RestoreAssignmentSnapshot>(_onRestoreSnapshot);
     on<FinalizeAssignment>(_onFinalizeAssignment);
   }
 
@@ -170,6 +172,56 @@ class ReceiptAssignmentBloc extends Bloc<AssignmentEvent, AssignmentState> {
     emit(
       state.copyWith(
         items: [...state.items, item],
+        clearFinalized: true,
+        clearError: true,
+      ),
+    );
+  }
+
+  void _onSplitScannedItem(
+    SplitScannedItem event,
+    Emitter<AssignmentState> emit,
+  ) {
+    final index = state.items.indexWhere((i) => i.id == event.itemId);
+    if (index < 0 || event.parts < 2) return;
+    final item = state.items[index];
+
+    final total = item.price.round();
+    final base = total ~/ event.parts;
+    final remainder = total - base * event.parts;
+    final name = ItemQuantity.baseName(item.name);
+
+    final parts = [
+      for (var p = 0; p < event.parts; p++)
+        AssignableItem(
+          id: '${item.id}_p${p + 1}',
+          name: '$name (${p + 1}/${event.parts})',
+          price: (base + (p < remainder ? 1 : 0)).toDouble(),
+          assignedPersonIds: item.assignedPersonIds,
+        ),
+    ];
+
+    emit(
+      state.copyWith(
+        items: [
+          ...state.items.sublist(0, index),
+          ...parts,
+          ...state.items.sublist(index + 1),
+        ],
+        clearFinalized: true,
+        clearError: true,
+      ),
+    );
+  }
+
+  void _onRestoreSnapshot(
+    RestoreAssignmentSnapshot event,
+    Emitter<AssignmentState> emit,
+  ) {
+    emit(
+      state.copyWith(
+        items: event.items,
+        persons: event.persons,
         clearFinalized: true,
         clearError: true,
       ),

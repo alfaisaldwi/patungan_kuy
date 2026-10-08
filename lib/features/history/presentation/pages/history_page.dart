@@ -5,6 +5,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../injection_container.dart';
 import '../../domain/entities/bill_history.dart';
 import '../bloc/history_bloc.dart';
+import '../../../../core/widgets/app_dialog.dart';
 
 class HistoryPage extends StatelessWidget {
   final void Function(BillHistory entry)? onLoadToCalculator;
@@ -47,7 +48,7 @@ class _HistoryView extends StatelessWidget {
 
   Widget _buildBody(HistoryState state) {
     if (state.status == HistoryStatus.loading || state.status == HistoryStatus.initial) {
-      return const SliverFillRemaining(
+      return SliverFillRemaining(
         hasScrollBody: false,
         child: Center(child: CircularProgressIndicator(color: AppTheme.primary)),
       );
@@ -124,23 +125,16 @@ class _HistoryHeader extends StatelessWidget {
 
   void _confirmClearAll(BuildContext context) {
     final bloc = context.read<HistoryBloc>();
-    showDialog<void>(
+    showAppConfirmDialog(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text('Hapus semua riwayat?', style: AppTheme.heading3),
-        content: Text('Semua tagihan tersimpan akan dihapus permanen.', style: AppTheme.body),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Batal')),
-          TextButton(
-            onPressed: () {
-              bloc.add(const ClearHistory());
-              Navigator.pop(dialogContext);
-            },
-            child: const Text('Hapus Semua', style: TextStyle(color: AppTheme.error)),
-          ),
-        ],
-      ),
-    );
+      icon: Icons.delete_sweep_rounded,
+      tone: AppDialogTone.danger,
+      title: 'Hapus semua riwayat?',
+      message: 'Semua tagihan tersimpan akan dihapus permanen.',
+      confirmLabel: 'Hapus Semua',
+    ).then((ok) {
+      if (ok) bloc.add(const ClearHistory());
+    });
   }
 }
 
@@ -191,8 +185,7 @@ class _HistoryCard extends StatelessWidget {
     return Dismissible(
       key: ValueKey(entry.id),
       direction: DismissDirection.endToStart,
-      confirmDismiss: (_) => _confirmDelete(context),
-      onDismissed: (_) => context.read<HistoryBloc>().add(DeleteHistoryEntry(id: entry.id)),
+      onDismissed: (_) => _deleteWithUndo(context),
       background: Container(
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceLg),
@@ -277,23 +270,23 @@ class _HistoryCard extends StatelessWidget {
     );
   }
 
-  Future<bool> _confirmDelete(BuildContext context) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text('Hapus tagihan ini?', style: AppTheme.heading3),
-        content: Text('Tagihan ini akan dihapus permanen.', style: AppTheme.body),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Batal')),
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text('Hapus', style: TextStyle(color: AppTheme.error)),
+  void _deleteWithUndo(BuildContext context) {
+    final bloc = context.read<HistoryBloc>();
+    final index = bloc.state.entries.indexWhere((e) => e.id == entry.id);
+    bloc.add(DeleteHistoryEntry(id: entry.id));
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: const Text('Tagihan dihapus dari riwayat.'),
+          action: SnackBarAction(
+            label: 'Urungkan',
+            onPressed: () => bloc.add(RestoreHistoryEntry(entry: entry, index: index)),
           ),
-        ],
-      ),
-    );
-    return confirmed ?? false;
+        ),
+      );
   }
+
 
   static String _formatDate(DateTime d) {
     const m = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];

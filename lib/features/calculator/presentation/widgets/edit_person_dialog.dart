@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../domain/entities/person_order.dart';
 import '../bloc/calculator_bloc.dart';
+import '../../../../core/widgets/app_dialog.dart';
 
 class EditPersonDialog extends StatefulWidget {
   final PersonOrder order;
@@ -80,16 +81,17 @@ class _EditPersonDialogState extends State<EditPersonDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text('Ubah Pesanan', style: AppTheme.heading3),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppTheme.radiusXl),
-      ),
+    return AppDialog(
+      icon: Icons.edit_note_rounded,
+      title: 'Ubah Pesanan',
+      confirmLabel: 'Simpan',
+      onConfirm: _save,
       content: SizedBox(
         width: double.maxFinite,
         child: Form(
           key: _formKey,
-          child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 4),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -169,13 +171,6 @@ class _EditPersonDialogState extends State<EditPersonDialog> {
           ),
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Batal'),
-        ),
-        ElevatedButton(onPressed: _save, child: const Text('Simpan')),
-      ],
     );
   }
 }

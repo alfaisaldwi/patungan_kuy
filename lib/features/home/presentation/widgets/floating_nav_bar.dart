@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:persistent_bottom_nav_bar_v2/persistent_bottom_nav_bar_v2.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/utils/color_extensions.dart';
 
 class FloatingNavBar extends StatelessWidget {
   final NavBarConfig navBarConfig;
@@ -22,7 +23,7 @@ class FloatingNavBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       decoration: BoxDecoration(
-        color: AppTheme.surface.withOpacity(.8),
+        color: AppTheme.surface.withOpacityValue(.8),
         borderRadius: BorderRadius.circular(AppTheme.radiusXl),
         boxShadow: [AppTheme.shadowMd],
         border: Border.all(color: AppTheme.border.withAlpha(128)),
@@ -67,7 +68,7 @@ class _NavItem extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 10),
 
         decoration: BoxDecoration(
-          color: selected ? item.activeForegroundColor.withAlpha(28) : null,
+          color: selected ? AppTheme.primaryLight : null,
           borderRadius: BorderRadius.circular(AppTheme.radiusLg),
         ),
         child: Row(

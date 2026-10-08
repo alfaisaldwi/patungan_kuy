@@ -16,19 +16,25 @@ class _PromoCarouselState extends State<PromoCarousel> {
       icon: Icons.groups_rounded,
       title: 'Patungan? Kuy!',
       subtitle: 'Split bill bareng temen jadi gampang & adil',
-      colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+      colors: [Color(0xFF1F2A44), Color(0xFF34436B)],
+      fg: Color(0xFFFFFFFF),
+      chip: Color(0xFFFFD23F),
     ),
     (
       icon: Icons.document_scanner_rounded,
       title: 'Scan struk otomatis',
       subtitle: 'Foto struknya, item & harga kebaca sendiri',
-      colors: [Color(0xFF0EA5E9), Color(0xFF38BDF8)],
+      colors: [Color(0xFFFFD23F), Color(0xFFFFB547)],
+      fg: Color(0xFF1F2A44),
+      chip: Color(0xFF1F2A44),
     ),
     (
       icon: Icons.campaign_rounded,
       title: 'Slot promo kamu di sini',
       subtitle: 'Siap dipakai buat iklan & penawaran spesial',
-      colors: [Color(0xFFF59E0B), Color(0xFFFBBF24)],
+      colors: [Color(0xFFFFC2CE), Color(0xFFFF8FA8)],
+      fg: Color(0xFF1F2A44),
+      chip: Color(0xFF1F2A44),
     ),
   ];
 
@@ -79,7 +85,7 @@ class _PromoCarouselState extends State<PromoCarousel> {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white.withAlpha(46),
+                            color: banner.chip,
                             borderRadius: BorderRadius.circular(
                               AppTheme.radiusFull,
                             ),
@@ -87,7 +93,9 @@ class _PromoCarouselState extends State<PromoCarousel> {
                           child: Text(
                             'Promo',
                             style: AppTheme.caption.copyWith(
-                              color: Colors.white,
+                              color: banner.chip == AppTheme.brandYellow
+                                  ? AppTheme.brandNavy
+                                  : Colors.white,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -95,15 +103,13 @@ class _PromoCarouselState extends State<PromoCarousel> {
                         const SizedBox(height: AppTheme.spaceSm),
                         Text(
                           banner.title,
-                          style: AppTheme.heading3.copyWith(
-                            color: Colors.white,
-                          ),
+                          style: AppTheme.heading3.copyWith(color: banner.fg),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           banner.subtitle,
                           style: AppTheme.caption.copyWith(
-                            color: Colors.white.withAlpha(217),
+                            color: banner.fg.withAlpha(217),
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -116,10 +122,10 @@ class _PromoCarouselState extends State<PromoCarousel> {
                     width: 52,
                     height: 52,
                     decoration: BoxDecoration(
-                      color: Colors.white.withAlpha(38),
+                      color: banner.fg.withAlpha(30),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(banner.icon, color: Colors.white, size: 26),
+                    child: Icon(banner.icon, color: banner.fg, size: 26),
                   ),
                 ],
               ),

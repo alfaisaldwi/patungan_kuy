@@ -2,28 +2,32 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:patungan_kuy/injection_container.dart';
 import 'package:patungan_kuy/main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:showcaseview/showcaseview.dart';
 
 void main() {
   setUp(() async {
-    // Reset DI before each test to ensure clean state.
+    SharedPreferences.setMockInitialValues({'has_seen_showcase': true});
     await GetIt.instance.reset();
     await initDependencies();
   });
 
-  testWidgets('PatunganKuy smoke test — app renders', (WidgetTester tester) async {
+  tearDown(() => ShowcaseView.get().unregister());
+
+  testWidgets('splash lalu beranda tampil', (tester) async {
     await tester.pumpWidget(const PatunganKuyApp());
-    await tester.pumpAndSettle();
 
-    // Verify the app bar title is displayed.
-    expect(find.text('PatunganKuy'), findsOneWidget);
+    expect(find.text('Hitung Patungan'), findsNothing);
 
-    // Verify the "Add Person" section is present.
-    expect(find.text('Add Person'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 2300));
+    await tester.pump(const Duration(milliseconds: 600));
+    await tester.pump(const Duration(milliseconds: 100));
 
-    // Verify the calculate button is present (disabled initially since no orders).
-    expect(find.text('Calculate Split'), findsOneWidget);
+    expect(find.text('Hitung Patungan'), findsOneWidget);
+    expect(find.text('Scan Struk'), findsOneWidget);
+    expect(find.text('Tulis Manual'), findsOneWidget);
+    expect(find.byTooltip('Pengaturan'), findsOneWidget);
 
-    // Verify the empty state message.
-    expect(find.text('No orders yet'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 2));
   });
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:showcaseview/showcaseview.dart';
@@ -8,6 +10,7 @@ import '../../../scanner/domain/entities/parsed_receipt.dart';
 import '../bloc/assignment_bloc.dart';
 import '../models/assignment_models.dart';
 import '../models/assignment_result.dart';
+import '../../../../core/widgets/app_dialog.dart';
 
 class AssignmentPage extends StatelessWidget {
   final ParsedReceipt receipt;
@@ -28,12 +31,12 @@ class AssignmentPage extends StatelessWidget {
 }
 
 const _avatarColors = <Color>[
-  Color(0xFF6366F1),
+  Color(0xFF2E4A8B),
   Color(0xFF0EA5E9),
   Color(0xFF10B981),
   Color(0xFFF59E0B),
   Color(0xFFEC4899),
-  Color(0xFF8B5CF6),
+  Color(0xFFD63B6E),
   Color(0xFF14B8A6),
   Color(0xFFEF4444),
 ];
@@ -73,39 +76,135 @@ class _PersonAvatar extends StatelessWidget {
   }
 }
 
-void _confirmRemovePerson(
+void _showUndoSnackBar(
+  BuildContext context, {
+  required String message,
+  required AssignmentState snapshot,
+}) {
+  final bloc = context.read<ReceiptAssignmentBloc>();
+  ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(
+      SnackBar(
+        content: Text(message),
+        action: SnackBarAction(
+          label: 'Urungkan',
+          onPressed: () => bloc.add(
+            RestoreAssignmentSnapshot(
+              items: snapshot.items,
+              persons: snapshot.persons,
+            ),
+          ),
+        ),
+      ),
+    );
+}
+
+void _removePersonWithUndo(
   BuildContext context,
-  Person person,
-  int assignedCount, {
+  Person person, {
   VoidCallback? onRemoved,
 }) {
   final bloc = context.read<ReceiptAssignmentBloc>();
-  showDialog<void>(
+  final snapshot = bloc.state;
+  bloc.add(RemovePerson(personId: person.id));
+  _showUndoSnackBar(
+    context,
+    message: '${person.name} dihapus.',
+    snapshot: snapshot,
+  );
+  onRemoved?.call();
+}
+
+Future<void> _askSplit(BuildContext context, AssignableItem item) async {
+  final bloc = context.read<ReceiptAssignmentBloc>();
+  final detected = ItemQuantity.detect(item.name);
+  final parts = await showAppDialog<int>(
     context: context,
-    builder: (dialogContext) => AlertDialog(
-      title: Text('Hapus ${person.name}?', style: AppTheme.heading3),
-      content: Text(
-        assignedCount == 0
-            ? '${person.name} akan dihapus dari daftar.'
-            : '$assignedCount item yang dia ikuti akan balik jadi belum kebagi.',
-        style: AppTheme.body,
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(dialogContext),
-          child: const Text('Batal'),
-        ),
-        TextButton(
-          onPressed: () {
-            bloc.add(RemovePerson(personId: person.id));
-            Navigator.pop(dialogContext);
-            onRemoved?.call();
-          },
-          child: const Text('Hapus', style: TextStyle(color: AppTheme.error)),
-        ),
-      ],
+    builder: (_) => _SplitDialog(
+      itemName: ItemQuantity.baseName(item.name),
+      price: item.price,
+      initial: detected >= 2 ? detected : 2,
     ),
   );
+  if (parts == null || !context.mounted) return;
+  final snapshot = bloc.state;
+  bloc.add(SplitScannedItem(itemId: item.id, parts: parts));
+  _showUndoSnackBar(
+    context,
+    message: '${ItemQuantity.baseName(item.name)} dipecah jadi $parts porsi.',
+    snapshot: snapshot,
+  );
+  Navigator.of(context).pop();
+}
+
+class _SplitDialog extends StatefulWidget {
+  final String itemName;
+  final double price;
+  final int initial;
+
+  const _SplitDialog({
+    required this.itemName,
+    required this.price,
+    required this.initial,
+  });
+
+  @override
+  State<_SplitDialog> createState() => _SplitDialogState();
+}
+
+class _SplitDialogState extends State<_SplitDialog> {
+  static const _min = 2;
+  static const _max = 20;
+  late int _parts = widget.initial.clamp(_min, _max);
+
+  Widget _stepButton(IconData icon, VoidCallback? onTap) {
+    return IconButton.filledTonal(onPressed: onTap, icon: Icon(icon, size: 20));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AppDialog(
+      icon: Icons.call_split_rounded,
+      title: 'Pecah per porsi',
+      message:
+          '${widget.itemName} dibeli berapa porsi? Tiap porsi bisa dibagi ke orang berbeda.',
+      confirmLabel: 'Pecah',
+      onCancel: () => Navigator.pop(context),
+      onConfirm: () => Navigator.pop(context, _parts),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _stepButton(
+                Icons.remove_rounded,
+                _parts > _min ? () => setState(() => _parts--) : null,
+              ),
+              SizedBox(
+                width: 64,
+                child: Text(
+                  '$_parts',
+                  textAlign: TextAlign.center,
+                  style: AppTheme.heading2,
+                ),
+              ),
+              _stepButton(
+                Icons.add_rounded,
+                _parts < _max ? () => setState(() => _parts++) : null,
+              ),
+            ],
+          ),
+          const SizedBox(height: AppTheme.spaceSm),
+          Text(
+            '${AppTheme.formatRupiah((widget.price / _parts).round())} per porsi',
+            style: AppTheme.label.copyWith(color: AppTheme.primary),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _AssignmentView extends StatefulWidget {
@@ -517,6 +616,17 @@ class _ItemTile extends StatelessWidget {
                             : AppTheme.formatRupiah(item.price),
                         style: AppTheme.bodySmall,
                       ),
+                      if (ItemQuantity.detect(item.name) >= 2)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Text(
+                            '${ItemQuantity.detect(item.name)} porsi? Bisa dipecah per orang',
+                            style: AppTheme.caption.copyWith(
+                              color: AppTheme.accent,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -801,7 +911,7 @@ class _ScannedItemsCard extends StatelessWidget {
                             color: AppTheme.primaryLight,
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.receipt_long,
                             color: AppTheme.primary,
                             size: 20,
@@ -845,7 +955,7 @@ class _ScannedItemsCard extends StatelessWidget {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.edit_outlined,
                                 color: AppTheme.accent,
                                 size: 14,
@@ -932,7 +1042,27 @@ class _ItemPickerSheet extends StatelessWidget {
                   ],
                 ),
               ),
-              const Divider(height: AppTheme.spaceXl),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppTheme.paddingPage,
+                  AppTheme.spaceSm,
+                  AppTheme.paddingPage,
+                  0,
+                ),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    onPressed: () => _askSplit(context, item),
+                    icon: const Icon(Icons.call_split_rounded, size: 18),
+                    label: Text(
+                      ItemQuantity.detect(item.name) >= 2
+                          ? 'Ada ${ItemQuantity.detect(item.name)} porsi? Pecah per porsi'
+                          : 'Lebih dari 1 porsi? Pecah per porsi',
+                    ),
+                  ),
+                ),
+              ),
+              const Divider(height: AppTheme.spaceLg),
               Flexible(
                 child: ListView(
                   shrinkWrap: true,
@@ -988,11 +1118,58 @@ class _ItemPickerSheet extends StatelessWidget {
   }
 }
 
-class _ItemsEditorSheet extends StatelessWidget {
+class _ItemsEditorSheet extends StatefulWidget {
   const _ItemsEditorSheet();
 
+  @override
+  State<_ItemsEditorSheet> createState() => _ItemsEditorSheetState();
+}
+
+class _ItemsEditorSheetState extends State<_ItemsEditorSheet> {
+  AssignmentState? _undoSnapshot;
+  String? _undoLabel;
+  Timer? _undoTimer;
+
+  @override
+  void dispose() {
+    _undoTimer?.cancel();
+    super.dispose();
+  }
+
+  void _removeItem(BuildContext context, AssignableItem item) {
+    final bloc = context.read<ReceiptAssignmentBloc>();
+    _undoTimer?.cancel();
+    setState(() {
+      _undoSnapshot = bloc.state;
+      _undoLabel = '${item.name.isEmpty ? 'Item' : item.name} dihapus.';
+    });
+    bloc.add(RemoveScannedItem(itemId: item.id));
+    _undoTimer = Timer(const Duration(seconds: 5), _clearUndo);
+  }
+
+  void _undo(BuildContext context) {
+    final snapshot = _undoSnapshot;
+    if (snapshot == null) return;
+    context.read<ReceiptAssignmentBloc>().add(
+      RestoreAssignmentSnapshot(
+        items: snapshot.items,
+        persons: snapshot.persons,
+      ),
+    );
+    _clearUndo();
+  }
+
+  void _clearUndo() {
+    _undoTimer?.cancel();
+    if (!mounted) return;
+    setState(() {
+      _undoSnapshot = null;
+      _undoLabel = null;
+    });
+  }
+
   void _openItemDialog(BuildContext context, {AssignableItem? item}) {
-    showDialog<void>(
+    showAppDialog<void>(
       context: context,
       builder: (_) => BlocProvider.value(
         value: context.read<ReceiptAssignmentBloc>(),
@@ -1155,9 +1332,7 @@ class _ItemsEditorSheet extends StatelessWidget {
                             visualDensity: VisualDensity.compact,
                             icon: const Icon(Icons.delete_outline, size: 18),
                             color: AppTheme.error,
-                            onPressed: () => context
-                                .read<ReceiptAssignmentBloc>()
-                                .add(RemoveScannedItem(itemId: item.id)),
+                            onPressed: () => _removeItem(context, item),
                           ),
                         ],
                       ),
@@ -1172,13 +1347,50 @@ class _ItemsEditorSheet extends StatelessWidget {
                   AppTheme.paddingPage,
                   AppTheme.spaceXl,
                 ),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: () => _openItemDialog(context),
-                    icon: const Icon(Icons.add_rounded, size: 18),
-                    label: const Text('Tambah Item'),
-                  ),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  child: _undoLabel != null
+                      ? Container(
+                          key: const ValueKey('undo'),
+                          padding: const EdgeInsets.only(
+                            left: AppTheme.spaceLg,
+                            right: AppTheme.spaceXs,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppTheme.secondary,
+                            borderRadius: BorderRadius.circular(
+                              AppTheme.radiusMd,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  _undoLabel!,
+                                  style: AppTheme.bodySmall.copyWith(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () => _undo(context),
+                                child: const Text(
+                                  'Urungkan',
+                                  style: TextStyle(color: Color(0xFFFFD23F)),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : SizedBox(
+                          key: const ValueKey('add'),
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
+                            onPressed: () => _openItemDialog(context),
+                            icon: const Icon(Icons.add_rounded, size: 18),
+                            label: const Text('Tambah Item'),
+                          ),
+                        ),
                 ),
               ),
             ],
@@ -1229,14 +1441,12 @@ class _EditItemDialogState extends State<_EditItemDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(
-        widget.item == null ? 'Tambah Item' : 'Ubah Item',
-        style: AppTheme.heading3,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppTheme.radiusXl),
-      ),
+    return AppDialog(
+      icon: widget.item == null ? Icons.add_rounded : Icons.edit_rounded,
+      title: widget.item == null ? 'Tambah Item' : 'Ubah Item',
+      confirmLabel: 'Simpan',
+      onCancel: () => Navigator.pop(context),
+      onConfirm: _save,
       content: Form(
         key: _formKey,
         child: Column(
@@ -1269,13 +1479,6 @@ class _EditItemDialogState extends State<_EditItemDialog> {
           ],
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Batal'),
-        ),
-        ElevatedButton(onPressed: _save, child: const Text('Simpan')),
-      ],
     );
   }
 }
@@ -1369,10 +1572,9 @@ class _AssignmentChecklistSheetState extends State<_AssignmentChecklistSheet> {
                             size: 20,
                           ),
                           color: AppTheme.textHint,
-                          onPressed: () => _confirmRemovePerson(
+                          onPressed: () => _removePersonWithUndo(
                             context,
                             person,
-                            count,
                             onRemoved: () => Navigator.pop(context),
                           ),
                         ),

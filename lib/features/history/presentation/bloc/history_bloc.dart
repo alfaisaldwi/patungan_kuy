@@ -5,6 +5,7 @@ import '../../domain/entities/bill_history.dart';
 import '../../domain/usecases/clear_bill_history_usecase.dart';
 import '../../domain/usecases/delete_bill_history_usecase.dart';
 import '../../domain/usecases/get_bill_history_usecase.dart';
+import '../../domain/usecases/save_bill_history_usecase.dart';
 
 part 'history_event.dart';
 part 'history_state.dart';
@@ -13,18 +14,43 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
   final GetBillHistoryUseCase _getBillHistoryUseCase;
   final DeleteBillHistoryUseCase _deleteBillHistoryUseCase;
   final ClearBillHistoryUseCase _clearBillHistoryUseCase;
+  final SaveBillHistoryUseCase _saveBillHistoryUseCase;
 
   HistoryBloc({
     required GetBillHistoryUseCase getBillHistoryUseCase,
     required DeleteBillHistoryUseCase deleteBillHistoryUseCase,
     required ClearBillHistoryUseCase clearBillHistoryUseCase,
+    required SaveBillHistoryUseCase saveBillHistoryUseCase,
   }) : _getBillHistoryUseCase = getBillHistoryUseCase,
        _deleteBillHistoryUseCase = deleteBillHistoryUseCase,
        _clearBillHistoryUseCase = clearBillHistoryUseCase,
+       _saveBillHistoryUseCase = saveBillHistoryUseCase,
        super(const HistoryState()) {
     on<LoadHistory>(_onLoadHistory);
     on<DeleteHistoryEntry>(_onDeleteHistoryEntry);
+    on<RestoreHistoryEntry>(_onRestoreHistoryEntry);
     on<ClearHistory>(_onClearHistory);
+  }
+
+  Future<void> _onRestoreHistoryEntry(
+    RestoreHistoryEntry event,
+    Emitter<HistoryState> emit,
+  ) async {
+    if (state.entries.any((e) => e.id == event.entry.id)) return;
+    final result = await _saveBillHistoryUseCase(event.entry);
+    result.fold(
+      (failure) => emit(
+        state.copyWith(
+          status: HistoryStatus.error,
+          errorMessage: failure.message,
+        ),
+      ),
+      (_) {
+        final entries = [...state.entries];
+        entries.insert(event.index.clamp(0, entries.length), event.entry);
+        emit(state.copyWith(status: HistoryStatus.loaded, entries: entries));
+      },
+    );
   }
 
   Future<void> _onLoadHistory(

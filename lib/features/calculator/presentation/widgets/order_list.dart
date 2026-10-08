@@ -10,6 +10,7 @@ import 'edit_person_dialog.dart';
 import 'promo_carousel.dart';
 import 'scan_picker.dart';
 import 'small_icon_button.dart';
+import '../../../../core/widgets/app_dialog.dart';
 
 class OrdersCountBadge extends StatelessWidget {
   const OrdersCountBadge({super.key});
@@ -181,7 +182,7 @@ class _EmptyStateChoiceCard extends StatelessWidget {
                   height: 48,
                   decoration: BoxDecoration(color: iconBg, borderRadius: BorderRadius.circular(14)),
                   child: loading
-                      ? const Center(
+                      ? Center(
                           child: SizedBox(
                             width: 20,
                             height: 20,
@@ -208,10 +209,10 @@ class _EmptyStateChoiceCard extends StatelessWidget {
                               ),
                               child: Text(
                                 badge!,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w700,
-                                  color: Colors.white,
+                                  color: AppTheme.textOnPrimary,
                                   letterSpacing: 0.4,
                                 ),
                               ),
@@ -250,7 +251,7 @@ class _QuickAddRow extends StatelessWidget {
           child: OutlinedButton.icon(
             onPressed: isScanning ? null : () => showScanPicker(context),
             icon: isScanning
-                ? const SizedBox(
+                ? SizedBox(
                     width: 14,
                     height: 14,
                     child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primary),
@@ -279,7 +280,7 @@ class _OrderTile extends StatelessWidget {
   const _OrderTile({super.key, required this.order});
 
   void _openEditDialog(BuildContext context) {
-    showDialog(
+    showAppDialog<void>(
       context: context,
       builder: (_) => BlocProvider.value(
         value: context.read<CalculatorBloc>(),
@@ -290,6 +291,7 @@ class _OrderTile extends StatelessWidget {
 
   void _removeWithUndo(BuildContext context) {
     final calc = context.read<CalculatorBloc>();
+    final index = calc.state.orders.indexWhere((o) => o.id == order.id);
     calc.add(RemovePersonOrder(id: order.id));
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
@@ -298,7 +300,7 @@ class _OrderTile extends StatelessWidget {
           content: Text('Pesanan ${order.name} dihapus.'),
           action: SnackBarAction(
             label: 'Urungkan',
-            onPressed: () => calc.add(AddPersonOrder(name: order.name, items: order.items)),
+            onPressed: () => calc.add(RestorePersonOrder(order: order, index: index)),
           ),
         ),
       );
@@ -341,7 +343,7 @@ class _OrderTile extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Center(
-                    child: Text(order.name[0].toUpperCase(), style: AppTheme.label.copyWith(color: Colors.white)),
+                    child: Text(order.name[0].toUpperCase(), style: AppTheme.label.copyWith(color: AppTheme.onCta)),
                   ),
                 ),
                 const SizedBox(width: 10),
