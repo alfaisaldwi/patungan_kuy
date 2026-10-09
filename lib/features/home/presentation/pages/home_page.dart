@@ -77,10 +77,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _handleBackPress() async {
-    final tabNavigator = (_controller.index == _homeTabIndex
-            ? _calculatorTabSheetObserver
-            : _historyTabSheetObserver)
-        .navigator;
+    final tabNavigator =
+        (_controller.index == _homeTabIndex
+                ? _calculatorTabSheetObserver
+                : _historyTabSheetObserver)
+            .navigator;
     if (tabNavigator != null && tabNavigator.canPop()) {
       tabNavigator.maybePop();
       return;

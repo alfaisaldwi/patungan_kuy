@@ -1,4 +1,4 @@
-package com.elyss.patungankuy
+package com.elumi.patungankuy
 
 import io.flutter.embedding.android.FlutterActivity
 

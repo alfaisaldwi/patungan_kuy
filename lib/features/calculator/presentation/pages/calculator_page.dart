@@ -336,14 +336,6 @@ class _ContinueButton extends StatelessWidget {
         return SizedBox(
           height: 52,
           child: ElevatedButton.icon(
-            style: ButtonStyle(
-              shape: WidgetStateProperty.all<OutlinedBorder>(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.0),
-                  side: const BorderSide(color: Colors.transparent, width: 1),
-                ),
-              ),
-            ),
             onPressed: state.orders.isEmpty ? null : onTap,
             icon: Icon(
               hasResult

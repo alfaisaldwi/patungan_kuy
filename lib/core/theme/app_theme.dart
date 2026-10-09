@@ -163,6 +163,19 @@ class AppTheme {
     return double.tryParse(s) ?? 0.0;
   }
 
+  static final TextInputFormatter percentFormatter = _PercentInputFormatter();
+
+  static double parsePercent(String text) =>
+      double.tryParse(text.replaceAll(',', '.')) ?? 0.0;
+
+  static String formatPercent(num value) {
+    final rounded = (value * 100).round() / 100;
+    if (rounded == rounded.truncateToDouble()) {
+      return rounded.toInt().toString();
+    }
+    return rounded.toString().replaceAll('.', ',');
+  }
+
   static const double spaceXs = 4;
   static const double spaceSm = 8;
   static const double spaceMd = 12;
@@ -178,6 +191,7 @@ class AppTheme {
   static const double radiusLg = 16;
   static const double radiusXl = 20;
   static const double radiusFull = 999;
+  static const double radiusButton = radiusSm;
 
   static BoxShadow get shadowSm => BoxShadow(
     color: brandNavy.withAlpha(_isDark ? 60 : 10),
@@ -244,7 +258,7 @@ class AppTheme {
     elevation: 0,
     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(radiusFull),
+      borderRadius: BorderRadius.circular(radiusButton),
     ),
     textStyle: const TextStyle(
       fontSize: 15,
@@ -259,7 +273,7 @@ class AppTheme {
     elevation: 0,
     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(radiusFull),
+      borderRadius: BorderRadius.circular(radiusButton),
     ),
     textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
   );
@@ -340,5 +354,20 @@ class _RupiahInputFormatter extends TextInputFormatter {
       text: formatted,
       selection: TextSelection.collapsed(offset: newOffset),
     );
+  }
+}
+
+class _PercentInputFormatter extends TextInputFormatter {
+  static final _pattern = RegExp(r'^\d{0,3}(,\d{0,2})?$');
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final text = newValue.text.replaceAll('.', ',');
+    if (!_pattern.hasMatch(text)) return oldValue;
+    if (AppTheme.parsePercent(text) > 100) return oldValue;
+    return newValue.copyWith(text: text);
   }
 }

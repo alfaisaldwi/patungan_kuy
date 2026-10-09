@@ -12,6 +12,8 @@ class ScannerBloc extends Bloc<ScannerEvent, ScannerState> {
   final ExtractReceiptDataUseCase _extractReceiptDataUseCase;
   final ImagePicker _imagePicker;
 
+  static const double _maxImageSide = 2576;
+
   ScannerBloc({
     required ExtractReceiptDataUseCase extractReceiptDataUseCase,
     ImagePicker? imagePicker,
@@ -40,11 +42,15 @@ class ScannerBloc extends Bloc<ScannerEvent, ScannerState> {
         pickedFile = await _imagePicker.pickImage(
           source: ImageSource.camera,
           imageQuality: 85,
+          maxWidth: _maxImageSide,
+          maxHeight: _maxImageSide,
         );
       } else {
         pickedFile = await _imagePicker.pickImage(
           source: ImageSource.gallery,
           imageQuality: 85,
+          maxWidth: _maxImageSide,
+          maxHeight: _maxImageSide,
         );
       }
 

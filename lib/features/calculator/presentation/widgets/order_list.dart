@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/onboarding/showcase_tour.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/app_dialog.dart';
 import '../../../scanner/presentation/bloc/scanner_bloc.dart';
 import '../../domain/entities/person_order.dart';
 import '../bloc/calculator_bloc.dart';
@@ -10,7 +11,6 @@ import 'edit_person_dialog.dart';
 import 'promo_carousel.dart';
 import 'scan_picker.dart';
 import 'small_icon_button.dart';
-import '../../../../core/widgets/app_dialog.dart';
 
 class OrdersCountBadge extends StatelessWidget {
   const OrdersCountBadge({super.key});
@@ -23,17 +23,22 @@ class OrdersCountBadge extends StatelessWidget {
           duration: const Duration(milliseconds: 250),
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            color: state.orders.isEmpty ? AppTheme.divider : AppTheme.primaryLight,
+            color: state.orders.isEmpty
+                ? AppTheme.divider
+                : AppTheme.primaryLight,
             borderRadius: BorderRadius.circular(AppTheme.radiusFull),
           ),
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 200),
-            transitionBuilder: (child, anim) => ScaleTransition(scale: anim, child: child),
+            transitionBuilder: (child, anim) =>
+                ScaleTransition(scale: anim, child: child),
             child: Text(
               '${state.orders.length} orang',
               key: ValueKey(state.orders.length),
               style: AppTheme.caption.copyWith(
-                color: state.orders.isEmpty ? AppTheme.disabledText : AppTheme.primary,
+                color: state.orders.isEmpty
+                    ? AppTheme.disabledText
+                    : AppTheme.primary,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -56,7 +61,10 @@ class OrderList extends StatelessWidget {
         if (state.orders.isEmpty) {
           child = _EmptyOrders(onAddManually: onAddManually);
         } else {
-          final subtotal = state.orders.fold<double>(0, (s, o) => s + o.totalPrice);
+          final subtotal = state.orders.fold<double>(
+            0,
+            (s, o) => s + o.totalPrice,
+          );
           child = Column(
             children: [
               Row(
@@ -67,7 +75,9 @@ class OrderList extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: AppTheme.spaceSm),
-              ...state.orders.map((o) => _OrderTile(key: ValueKey(o.id), order: o)),
+              ...state.orders.map(
+                (o) => _OrderTile(key: ValueKey(o.id), order: o),
+              ),
               const SizedBox(height: AppTheme.spaceXs),
               _QuickAddRow(onAddManually: onAddManually),
             ],
@@ -91,7 +101,8 @@ class _EmptyOrders extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isScanning = context.watch<ScannerBloc>().state.status == ScannerStatus.loading;
+    final isScanning =
+        context.watch<ScannerBloc>().state.status == ScannerStatus.loading;
 
     return Column(
       children: [
@@ -180,13 +191,19 @@ class _EmptyStateChoiceCard extends StatelessWidget {
                 Container(
                   width: 48,
                   height: 48,
-                  decoration: BoxDecoration(color: iconBg, borderRadius: BorderRadius.circular(14)),
+                  decoration: BoxDecoration(
+                    color: iconBg,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                   child: loading
                       ? Center(
                           child: SizedBox(
                             width: 20,
                             height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primary),
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppTheme.primary,
+                            ),
                           ),
                         )
                       : Icon(icon, color: iconColor, size: 24),
@@ -198,14 +215,22 @@ class _EmptyStateChoiceCard extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          Text(title, style: AppTheme.label.copyWith(fontSize: 16)),
+                          Text(
+                            title,
+                            style: AppTheme.label.copyWith(fontSize: 16),
+                          ),
                           if (badge != null) ...[
                             const SizedBox(width: AppTheme.spaceSm),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
                               decoration: BoxDecoration(
                                 color: AppTheme.primary,
-                                borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+                                borderRadius: BorderRadius.circular(
+                                  AppTheme.radiusFull,
+                                ),
                               ),
                               child: Text(
                                 badge!,
@@ -221,7 +246,10 @@ class _EmptyStateChoiceCard extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 6),
-                      Text(description, style: AppTheme.bodySmall.copyWith(height: 1.45)),
+                      Text(
+                        description,
+                        style: AppTheme.bodySmall.copyWith(height: 1.45),
+                      ),
                     ],
                   ),
                 ),
@@ -242,24 +270,28 @@ class _QuickAddRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isScanning = context.watch<ScannerBloc>().state.status == ScannerStatus.loading;
+    // final isScanning =
+    //     context.watch<ScannerBloc>().state.status == ScannerStatus.loading;
     var isHidden = false;
 
     return Row(
       children: [
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: isScanning ? null : () => showScanPicker(context),
-            icon: isScanning
-                ? SizedBox(
-                    width: 14,
-                    height: 14,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primary),
-                  )
-                : const Icon(Icons.document_scanner_rounded, size: 16),
-            label: Text(isScanning ? 'Lagi scan...' : 'Scan Lagi'),
-          ),
-        ),
+        // Expanded(
+        //   child: OutlinedButton.icon(
+        //     onPressed: isScanning ? null : () => showScanPicker(context),
+        //     icon: isScanning
+        //         ? SizedBox(
+        //             width: 14,
+        //             height: 14,
+        //             child: CircularProgressIndicator(
+        //               strokeWidth: 2,
+        //               color: AppTheme.primary,
+        //             ),
+        //           )
+        //         : const Icon(Icons.document_scanner_rounded, size: 16),
+        //     label: Text(isScanning ? 'Lagi scan...' : 'Scan Lagi'),
+        //   ),
+        // ),
         Expanded(
           child: Visibility(
             visible: isHidden,
@@ -300,7 +332,8 @@ class _OrderTile extends StatelessWidget {
           content: Text('Pesanan ${order.name} dihapus.'),
           action: SnackBarAction(
             label: 'Urungkan',
-            onPressed: () => calc.add(RestorePersonOrder(order: order, index: index)),
+            onPressed: () =>
+                calc.add(RestorePersonOrder(order: order, index: index)),
           ),
         ),
       );
@@ -314,7 +347,10 @@ class _OrderTile extends StatelessWidget {
       curve: Curves.easeOutCubic,
       builder: (context, t, child) => Opacity(
         opacity: t,
-        child: Transform.translate(offset: Offset(0, 12 * (1 - t)), child: child),
+        child: Transform.translate(
+          offset: Offset(0, 12 * (1 - t)),
+          child: child,
+        ),
       ),
       child: _buildTile(context),
     );
@@ -343,14 +379,24 @@ class _OrderTile extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Center(
-                    child: Text(order.name[0].toUpperCase(), style: AppTheme.label.copyWith(color: AppTheme.onCta)),
+                    child: Text(
+                      order.name[0].toUpperCase(),
+                      style: AppTheme.label.copyWith(color: AppTheme.onCta),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(child: Text(order.name, style: AppTheme.label)),
-                Text(AppTheme.formatRupiah(order.totalPrice), style: AppTheme.price),
+                Text(
+                  AppTheme.formatRupiah(order.totalPrice),
+                  style: AppTheme.price,
+                ),
                 const SizedBox(width: 6),
-                SmallIconButton(icon: Icons.edit_outlined, tooltip: 'Ubah', onTap: () => _openEditDialog(context)),
+                SmallIconButton(
+                  icon: Icons.edit_outlined,
+                  tooltip: 'Ubah',
+                  onTap: () => _openEditDialog(context),
+                ),
                 const SizedBox(width: 4),
                 SmallIconButton(
                   icon: Icons.delete_outline,
@@ -370,8 +416,14 @@ class _OrderTile extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(item.name.isNotEmpty ? item.name : '(tanpa nama)', style: AppTheme.bodySmall),
-                      Text(AppTheme.formatRupiah(item.price), style: AppTheme.bodySmall),
+                      Text(
+                        item.name.isNotEmpty ? item.name : '(tanpa nama)',
+                        style: AppTheme.bodySmall,
+                      ),
+                      Text(
+                        AppTheme.formatRupiah(item.price),
+                        style: AppTheme.bodySmall,
+                      ),
                     ],
                   ),
                 ),

@@ -55,44 +55,48 @@ class _SummaryViewState extends State<_SummaryView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Ringkasan Tagihan', style: AppTheme.heading3),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SafeArea(
-              bottom: false,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppTheme.paddingPage,
-                  vertical: AppTheme.spaceLg,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _SectionHeader(
-                      icon: Icons.receipt_long_rounded,
-                      iconBg: AppTheme.accentLight,
-                      iconColor: AppTheme.accent,
-                      title: 'Biaya & Diskon',
-                      subtitle: 'Ongkir, pajak, dan promo kalau ada',
-                    ),
-                    const SizedBox(height: AppTheme.spaceLg),
-                    const FeesDiscountSection(),
-                    const SizedBox(height: AppTheme.space2xl),
-                    _CalculateButton(onPressed: _calculateAndShow),
-                    const SizedBox(height: AppTheme.spaceMd),
-                    const _ErrorDisplay(),
-                    const SizedBox(height: AppTheme.space2xl),
-                  ],
+    return PopScope(
+      onPopInvokedWithResult: (_, _) =>
+          FocusManager.instance.primaryFocus?.unfocus(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Ringkasan Tagihan', style: AppTheme.heading3),
+        ),
+        body: Column(
+          children: [
+            Expanded(
+              child: SafeArea(
+                bottom: false,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppTheme.paddingPage,
+                    vertical: AppTheme.spaceLg,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _SectionHeader(
+                        icon: Icons.receipt_long_rounded,
+                        iconBg: AppTheme.accentLight,
+                        iconColor: AppTheme.accent,
+                        title: 'Biaya & Diskon',
+                        subtitle: 'Ongkir, pajak, dan promo kalau ada',
+                      ),
+                      const SizedBox(height: AppTheme.spaceLg),
+                      const FeesDiscountSection(),
+                      const SizedBox(height: AppTheme.space2xl),
+                      _CalculateButton(onPressed: _calculateAndShow),
+                      const SizedBox(height: AppTheme.spaceMd),
+                      const _ErrorDisplay(),
+                      const SizedBox(height: AppTheme.space2xl),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          ResultSummaryBar(onView: _showResultSheet),
-        ],
+            ResultSummaryBar(onView: _showResultSheet),
+          ],
+        ),
       ),
     );
   }

@@ -21,13 +21,24 @@ class _FeesDiscountSectionState extends State<FeesDiscountSection> {
   void initState() {
     super.initState();
     final s = context.read<CalculatorBloc>().state;
-    _taxCtrl.text = s.taxFee > 0 ? s.taxFee.toString() : '';
-    _deliveryCtrl.text = s.deliveryFee > 0 ? s.deliveryFee.toString() : '';
-    _discountCtrl.text = s.discountAmount > 0
-        ? s.discountAmount.toString()
-        : '';
     _isPct = s.isDiscountPercentage;
+    _taxCtrl.text = _rupiahText(s.taxFee);
+    _deliveryCtrl.text = _rupiahText(s.deliveryFee);
+    _discountCtrl.text = _discountText(s.discountAmount);
   }
+
+  String _rupiahText(double value) =>
+      value > 0 ? AppTheme.formatRupiah(value) : '';
+
+  String _discountText(double value) {
+    if (value <= 0) return '';
+    return _isPct
+        ? AppTheme.formatPercent(value)
+        : AppTheme.formatRupiah(value);
+  }
+
+  double _parseDiscount(String text) =>
+      _isPct ? AppTheme.parsePercent(text) : AppTheme.parseRupiah(text);
 
   @override
   void dispose() {
@@ -40,7 +51,7 @@ class _FeesDiscountSectionState extends State<FeesDiscountSection> {
   void _emit() {
     final tax = AppTheme.parseRupiah(_taxCtrl.text);
     final delivery = AppTheme.parseRupiah(_deliveryCtrl.text);
-    final discount = AppTheme.parseRupiah(_discountCtrl.text);
+    final discount = _parseDiscount(_discountCtrl.text);
     context.read<CalculatorBloc>().add(
       UpdateFeesAndDiscount(
         taxFee: tax,
@@ -64,19 +75,13 @@ class _FeesDiscountSectionState extends State<FeesDiscountSection> {
     setState(() {
       _isPct = s.isDiscountPercentage;
       if (AppTheme.parseRupiah(_taxCtrl.text) != s.taxFee) {
-        _taxCtrl.text = s.taxFee > 0 ? AppTheme.formatRupiah(s.taxFee) : '';
+        _taxCtrl.text = _rupiahText(s.taxFee);
       }
       if (AppTheme.parseRupiah(_deliveryCtrl.text) != s.deliveryFee) {
-        _deliveryCtrl.text = s.deliveryFee > 0
-            ? AppTheme.formatRupiah(s.deliveryFee)
-            : '';
+        _deliveryCtrl.text = _rupiahText(s.deliveryFee);
       }
-      if (AppTheme.parseRupiah(_discountCtrl.text) != s.discountAmount) {
-        _discountCtrl.text = s.discountAmount > 0
-            ? (_isPct
-                  ? s.discountAmount.toString()
-                  : AppTheme.formatRupiah(s.discountAmount))
-            : '';
+      if (_parseDiscount(_discountCtrl.text) != s.discountAmount) {
+        _discountCtrl.text = _discountText(s.discountAmount);
       }
     });
   }
@@ -149,9 +154,11 @@ class _FeesDiscountSectionState extends State<FeesDiscountSection> {
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
-                      inputFormatters: _isPct
-                          ? null
-                          : [AppTheme.rupiahFormatter],
+                      inputFormatters: [
+                        _isPct
+                            ? AppTheme.percentFormatter
+                            : AppTheme.rupiahFormatter,
+                      ],
                       onChanged: (_) => _emit(),
                     ),
                   ),

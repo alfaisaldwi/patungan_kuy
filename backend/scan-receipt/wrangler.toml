@@ -1,0 +1,19 @@
+name = "patungan-kuy-scan-receipt"
+main = "src/index.ts"
+compatibility_date = "2026-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Any OpenRouter model id that supports image input + structured_outputs.
+# Change it and run `npx wrangler deploy` - the app doesn't need a rebuild.
+[vars]
+MODEL = "google/gemini-3.1-flash-lite"
+
+# Per-IP limit so a leaked APP_KEY can't drain the OpenRouter credit.
+[[ratelimits]]
+name = "SCAN_LIMITER"
+namespace_id = "1001"
+simple = { limit = 10, period = 60 }
+
+# Secrets (set with `npx wrangler secret put <NAME>`, never commit them):
+#   OPENROUTER_API_KEY - OpenRouter API key
+#   APP_KEY            - shared key the Flutter app sends in `x-app-key`

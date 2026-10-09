@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gal/gal.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/app_toast.dart';
 import '../bloc/calculator_bloc.dart';
 import '../utils/receipt_image_generator.dart';
 import 'receipt_image_view.dart';
-import 'package:gal/gal.dart';
-import '../../../../core/widgets/app_toast.dart';
 
 class ResultSummaryBar extends StatelessWidget {
   final VoidCallback onView;
@@ -262,7 +262,10 @@ class _ResultSheetState extends State<ResultSheet> {
                             child: OutlinedButton.icon(
                               onPressed: _anyBusy ? null : _onSave,
                               icon: _icon(_save, Icons.download_rounded),
-                              label: Text(_label(_save, 'Simpan ke Galeri')),
+                              label: Text(
+                                _label(_save, 'Simpan ke Galeri'),
+                                style: TextStyle(fontSize: 13),
+                              ),
                             ),
                           ),
                           const SizedBox(width: AppTheme.spaceSm),

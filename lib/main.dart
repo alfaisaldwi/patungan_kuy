@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'core/onboarding/showcase_tour.dart';
 import 'core/theme/app_theme.dart';
@@ -9,6 +11,7 @@ import 'injection_container.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  GoogleFonts.config.allowRuntimeFetching = false;
   await initDependencies();
   await ThemeController.init();
   runApp(const PatunganKuyApp());
@@ -63,6 +66,7 @@ class _PatunganKuyAppState extends State<PatunganKuyApp> {
     return ThemeData(
       useMaterial3: true,
       brightness: brightness,
+      fontFamily: 'Inter',
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppTheme.brandYellow,
         primary: AppTheme.primary,
@@ -76,6 +80,12 @@ class _PatunganKuyAppState extends State<PatunganKuyApp> {
         brightness: brightness,
       ),
       scaffoldBackgroundColor: AppTheme.background,
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+        },
+      ),
       appBarTheme: AppBarTheme(
         backgroundColor: AppTheme.surface,
         foregroundColor: AppTheme.textPrimary,

@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class SplashPage extends StatefulWidget {
   final VoidCallback onReveal;
@@ -27,6 +28,9 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
   static const _logoH = _logoW * 600 / 1920;
 
   static const _markFrac = 170 / 640;
+
+  static const _publisherAsset = 'assets/images/elumi.png';
+  static const _publisherSize = 32.0;
 
   static const _holdBeforeReveal = Duration(milliseconds: 2200);
   static const _fadeDelay = Duration(milliseconds: 100);
@@ -58,6 +62,10 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
   late final Animation<double> _textFade = CurvedAnimation(
     parent: _intro,
     curve: const Interval(0.25, 0.65, curve: Curves.easeOut),
+  );
+  late final Animation<double> _publisherFade = CurvedAnimation(
+    parent: _intro,
+    curve: const Interval(0.45, 0.85, curve: Curves.easeOut),
   );
   late final Animation<double> _dotsFade = CurvedAnimation(
     parent: _intro,
@@ -189,6 +197,42 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
     );
   }
 
+  Widget _buildPublisher() {
+    return FadeTransition(
+      opacity: _publisherFade,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: 6),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.asset(
+                  _publisherAsset,
+                  width: _publisherSize,
+                  height: _publisherSize,
+                  filterQuality: FilterQuality.high,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Elumi',
+                style: GoogleFonts.arimo(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: _navy,
+                ),
+              ),
+              const SizedBox(width: 15),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -201,7 +245,14 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
             child: Stack(
               children: [
                 Center(child: _buildLogo()),
-                Align(alignment: const Alignment(0, 0.82), child: _buildDots()),
+                Align(alignment: const Alignment(0, 0.62), child: _buildDots()),
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 32),
+                    child: _buildPublisher(),
+                  ),
+                ),
               ],
             ),
           ),

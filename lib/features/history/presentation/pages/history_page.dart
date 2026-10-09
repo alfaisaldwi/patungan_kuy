@@ -33,10 +33,19 @@ class _HistoryView extends StatelessWidget {
             return CustomScrollView(
               slivers: [
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(AppTheme.paddingPage, AppTheme.spaceLg, AppTheme.paddingPage, 0),
-                  sliver: SliverToBoxAdapter(child: _HistoryHeader(entryCount: state.entries.length)),
+                  padding: const EdgeInsets.fromLTRB(
+                    AppTheme.paddingPage,
+                    AppTheme.spaceLg,
+                    AppTheme.paddingPage,
+                    0,
+                  ),
+                  sliver: SliverToBoxAdapter(
+                    child: _HistoryHeader(entryCount: state.entries.length),
+                  ),
                 ),
-                const SliverToBoxAdapter(child: SizedBox(height: AppTheme.space2xl)),
+                const SliverToBoxAdapter(
+                  child: SizedBox(height: AppTheme.space2xl),
+                ),
                 _buildBody(state),
               ],
             );
@@ -47,10 +56,13 @@ class _HistoryView extends StatelessWidget {
   }
 
   Widget _buildBody(HistoryState state) {
-    if (state.status == HistoryStatus.loading || state.status == HistoryStatus.initial) {
+    if (state.status == HistoryStatus.loading ||
+        state.status == HistoryStatus.initial) {
       return SliverFillRemaining(
         hasScrollBody: false,
-        child: Center(child: CircularProgressIndicator(color: AppTheme.primary)),
+        child: Center(
+          child: CircularProgressIndicator(color: AppTheme.primary),
+        ),
       );
     }
     if (state.status == HistoryStatus.error) {
@@ -69,15 +81,25 @@ class _HistoryView extends StatelessWidget {
       );
     }
     if (state.entries.isEmpty) {
-      return const SliverFillRemaining(hasScrollBody: false, child: _EmptyState());
+      return const SliverFillRemaining(
+        hasScrollBody: false,
+        child: _EmptyState(),
+      );
     }
     return SliverPadding(
-      padding: const EdgeInsets.fromLTRB(AppTheme.paddingPage, 0, AppTheme.paddingPage, AppTheme.space2xl),
+      padding: const EdgeInsets.fromLTRB(
+        AppTheme.paddingPage,
+        0,
+        AppTheme.paddingPage,
+        AppTheme.space2xl,
+      ),
       sliver: SliverList.separated(
         itemCount: state.entries.length,
         separatorBuilder: (_, _) => const SizedBox(height: AppTheme.spaceMd),
-        itemBuilder: (context, index) =>
-            _HistoryCard(entry: state.entries[index], onLoadToCalculator: onLoadToCalculator),
+        itemBuilder: (context, index) => _HistoryCard(
+          entry: state.entries[index],
+          onLoadToCalculator: onLoadToCalculator,
+        ),
       ),
     );
   }
@@ -94,8 +116,15 @@ class _HistoryHeader extends StatelessWidget {
         Container(
           width: 40,
           height: 40,
-          decoration: BoxDecoration(color: AppTheme.primaryLight, borderRadius: BorderRadius.circular(12)),
-          child: Icon(Icons.receipt_long_rounded, color: AppTheme.primary, size: 20),
+          decoration: BoxDecoration(
+            color: AppTheme.primaryLight,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(
+            Icons.receipt_long_rounded,
+            color: AppTheme.primary,
+            size: 20,
+          ),
         ),
         const SizedBox(width: AppTheme.spaceMd),
         Expanded(
@@ -104,7 +133,9 @@ class _HistoryHeader extends StatelessWidget {
             children: [
               Text('Riwayat', style: AppTheme.heading3),
               Text(
-                entryCount == 0 ? 'Belum ada tagihan tersimpan' : '$entryCount tagihan tersimpan',
+                entryCount == 0
+                    ? 'Belum ada tagihan tersimpan'
+                    : '$entryCount tagihan tersimpan',
                 style: AppTheme.bodySmall,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -156,10 +187,18 @@ class _EmptyState extends StatelessWidget {
                 color: AppTheme.accentLight,
                 borderRadius: BorderRadius.circular(AppTheme.radiusXl),
               ),
-              child: Icon(Icons.receipt_long_rounded, color: AppTheme.accent, size: 32),
+              child: Icon(
+                Icons.receipt_long_rounded,
+                color: AppTheme.accent,
+                size: 32,
+              ),
             ),
             const SizedBox(height: AppTheme.spaceXl),
-            Text('Belum ada tagihan tersimpan', style: AppTheme.heading3, textAlign: TextAlign.center),
+            Text(
+              'Belum ada tagihan tersimpan',
+              style: AppTheme.heading3,
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: AppTheme.spaceXs),
             Text(
               'Tagihan yang udah dihitung akan otomatis\nkesimpan di sini',
@@ -189,7 +228,10 @@ class _HistoryCard extends StatelessWidget {
       background: Container(
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceLg),
-        decoration: BoxDecoration(color: AppTheme.errorLight, borderRadius: BorderRadius.circular(AppTheme.radiusLg)),
+        decoration: BoxDecoration(
+          color: AppTheme.errorLight,
+          borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+        ),
         child: Icon(Icons.delete_outline, color: AppTheme.error),
       ),
       child: Container(
@@ -211,7 +253,11 @@ class _HistoryCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.schedule_rounded, size: 13, color: AppTheme.textHint),
+                      Icon(
+                        Icons.schedule_rounded,
+                        size: 13,
+                        color: AppTheme.textHint,
+                      ),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
@@ -234,22 +280,39 @@ class _HistoryCard extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(names, style: AppTheme.bodySmall, maxLines: 1, overflow: TextOverflow.ellipsis),
+                        child: Text(
+                          names,
+                          style: AppTheme.bodySmall,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                       const SizedBox(width: AppTheme.spaceSm),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: AppTheme.primaryLight,
-                          borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.radiusFull,
+                          ),
                         ),
                         child: Text(
                           '${entry.orders.length} orang',
-                          style: AppTheme.caption.copyWith(color: AppTheme.primary, fontWeight: FontWeight.w700),
+                          style: AppTheme.caption.copyWith(
+                            color: AppTheme.primary,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
                       const SizedBox(width: AppTheme.spaceXs),
-                      Icon(Icons.chevron_right_rounded, color: AppTheme.textHint, size: 18),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        color: AppTheme.textHint,
+                        size: 18,
+                      ),
                     ],
                   ),
                 ],
@@ -265,8 +328,15 @@ class _HistoryCard extends StatelessWidget {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(AppTheme.radiusXl))),
-      builder: (_) => _HistoryDetailSheet(entry: entry, onLoadToCalculator: onLoadToCalculator),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppTheme.radiusXl),
+        ),
+      ),
+      builder: (_) => _HistoryDetailSheet(
+        entry: entry,
+        onLoadToCalculator: onLoadToCalculator,
+      ),
     );
   }
 
@@ -281,15 +351,28 @@ class _HistoryCard extends StatelessWidget {
           content: const Text('Tagihan dihapus dari riwayat.'),
           action: SnackBarAction(
             label: 'Urungkan',
-            onPressed: () => bloc.add(RestoreHistoryEntry(entry: entry, index: index)),
+            onPressed: () =>
+                bloc.add(RestoreHistoryEntry(entry: entry, index: index)),
           ),
         ),
       );
   }
 
-
   static String _formatDate(DateTime d) {
-    const m = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    const m = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'Mei',
+      'Jun',
+      'Jul',
+      'Agu',
+      'Sep',
+      'Okt',
+      'Nov',
+      'Des',
+    ];
     return '${d.day} ${m[d.month - 1]} ${d.year} · ${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
   }
 }
@@ -313,12 +396,17 @@ class _HistoryDetailSheet extends StatelessWidget {
             margin: const EdgeInsets.symmetric(vertical: 12),
             width: 36,
             height: 4,
-            decoration: BoxDecoration(color: AppTheme.disabled, borderRadius: BorderRadius.circular(2)),
+            decoration: BoxDecoration(
+              color: AppTheme.disabled,
+              borderRadius: BorderRadius.circular(2),
+            ),
           ),
           Expanded(
             child: ListView(
               controller: scrollController,
-              padding: const EdgeInsets.symmetric(horizontal: AppTheme.paddingPage),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppTheme.paddingPage,
+              ),
               children: [
                 Container(
                   width: double.infinity,
@@ -332,17 +420,23 @@ class _HistoryDetailSheet extends StatelessWidget {
                     children: [
                       Text(
                         _HistoryCard._formatDate(entry.createdAt),
-                        style: AppTheme.bodySmall.copyWith(color: AppTheme.primary),
+                        style: AppTheme.bodySmall.copyWith(
+                          color: AppTheme.primary,
+                        ),
                       ),
                       const SizedBox(height: 6),
                       Text(
                         AppTheme.formatRupiah(r.grandTotal),
-                        style: AppTheme.priceLarge.copyWith(color: AppTheme.primary),
+                        style: AppTheme.priceLarge.copyWith(
+                          color: AppTheme.primary,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         '${entry.orders.length} orang ikut patungan',
-                        style: AppTheme.bodySmall.copyWith(color: AppTheme.primary),
+                        style: AppTheme.bodySmall.copyWith(
+                          color: AppTheme.primary,
+                        ),
                       ),
                     ],
                   ),
@@ -368,7 +462,9 @@ class _HistoryDetailSheet extends StatelessWidget {
                 Text('Rincian per Orang', style: AppTheme.heading3),
                 const SizedBox(height: AppTheme.spaceMd),
                 ...entry.orders.map((order) {
-                  final bill = r.calculatedBills.where((b) => b.personId == order.id).toList();
+                  final bill = r.calculatedBills
+                      .where((b) => b.personId == order.id)
+                      .toList();
                   return Container(
                     margin: const EdgeInsets.only(bottom: AppTheme.spaceSm),
                     padding: const EdgeInsets.all(AppTheme.spaceMd),
@@ -391,7 +487,9 @@ class _HistoryDetailSheet extends StatelessWidget {
                               ),
                               child: Center(
                                 child: Text(
-                                  order.name.isNotEmpty ? order.name[0].toUpperCase() : '?',
+                                  order.name.isNotEmpty
+                                      ? order.name[0].toUpperCase()
+                                      : '?',
                                   style: AppTheme.caption.copyWith(
                                     color: AppTheme.primary,
                                     fontWeight: FontWeight.w700,
@@ -400,9 +498,14 @@ class _HistoryDetailSheet extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: AppTheme.spaceSm),
-                            Expanded(child: Text(order.name, style: AppTheme.label)),
+                            Expanded(
+                              child: Text(order.name, style: AppTheme.label),
+                            ),
                             if (bill.isNotEmpty)
-                              Text(AppTheme.formatRupiah(bill.first.finalPayable), style: AppTheme.price),
+                              Text(
+                                AppTheme.formatRupiah(bill.first.finalPayable),
+                                style: AppTheme.price,
+                              ),
                           ],
                         ),
                         if (order.items.isNotEmpty) ...[
@@ -413,7 +516,8 @@ class _HistoryDetailSheet extends StatelessWidget {
                             (item) => Padding(
                               padding: const EdgeInsets.only(bottom: 4),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Expanded(
                                     child: Text(
@@ -422,7 +526,10 @@ class _HistoryDetailSheet extends StatelessWidget {
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
-                                  Text(AppTheme.formatRupiah(item.price), style: AppTheme.caption),
+                                  Text(
+                                    AppTheme.formatRupiah(item.price),
+                                    style: AppTheme.caption,
+                                  ),
                                 ],
                               ),
                             ),
@@ -437,7 +544,12 @@ class _HistoryDetailSheet extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(AppTheme.paddingPage, 0, AppTheme.paddingPage, AppTheme.spaceXl),
+            padding: const EdgeInsets.fromLTRB(
+              AppTheme.paddingPage,
+              0,
+              AppTheme.paddingPage,
+              AppTheme.spaceXl,
+            ),
             child: SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
@@ -468,7 +580,10 @@ class _HistoryDetailSheet extends StatelessWidget {
         Text(label, style: AppTheme.body),
         Text(
           '${isDeduct ? "- " : ""}${AppTheme.formatRupiah(value)}',
-          style: AppTheme.body.copyWith(color: isDeduct ? AppTheme.error : null, fontWeight: FontWeight.w600),
+          style: AppTheme.body.copyWith(
+            color: isDeduct ? AppTheme.error : null,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ],
     );

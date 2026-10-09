@@ -15,6 +15,7 @@ import 'features/history/domain/usecases/delete_bill_history_usecase.dart';
 import 'features/history/domain/usecases/get_bill_history_usecase.dart';
 import 'features/history/domain/usecases/save_bill_history_usecase.dart';
 import 'features/history/presentation/bloc/history_bloc.dart';
+import 'features/scanner/data/datasources/receipt_ai_datasource.dart';
 import 'features/scanner/data/datasources/receipt_scanner_datasource.dart';
 import 'features/scanner/data/repositories/receipt_scanner_repository_impl.dart';
 import 'features/scanner/domain/repositories/receipt_scanner_repository.dart';
@@ -33,8 +34,12 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton<ReceiptScannerDataSource>(
     () => ReceiptScannerDataSource(),
   );
+  sl.registerLazySingleton<ReceiptAiDataSource>(() => ReceiptAiDataSource());
   sl.registerLazySingleton<ReceiptScannerRepository>(
-    () => ReceiptScannerRepositoryImpl(sl<ReceiptScannerDataSource>()),
+    () => ReceiptScannerRepositoryImpl(
+      sl<ReceiptScannerDataSource>(),
+      aiDataSource: sl<ReceiptAiDataSource>(),
+    ),
   );
 
   sl.registerLazySingleton<BillHistoryDataSource>(

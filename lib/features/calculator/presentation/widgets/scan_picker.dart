@@ -35,11 +35,7 @@ void showScanPicker(BuildContext context) {
                 color: AppTheme.primaryLight,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(
-                Icons.camera_alt,
-                color: AppTheme.primary,
-                size: 20,
-              ),
+              child: Icon(Icons.camera_alt, color: AppTheme.primary, size: 20),
             ),
             title: Text('Kamera', style: AppTheme.body),
             subtitle: Text(

@@ -134,7 +134,8 @@ class _ReceiptExamplesSheetState extends State<_ReceiptExamplesSheet> {
     Navigator.of(context).push(
       PageRouteBuilder(
         opaque: false,
-        pageBuilder: (_, _, _) => _FullscreenExample(path: _exampleImages[index]),
+        pageBuilder: (_, _, _) =>
+            _FullscreenExample(path: _exampleImages[index]),
         transitionsBuilder: (_, anim, _, child) =>
             FadeTransition(opacity: anim, child: child),
       ),
@@ -191,9 +192,10 @@ class _FullscreenExampleState extends State<_FullscreenExample>
       return;
     }
 
-    _resetAnimation = Tween(begin: _dragDy, end: 0.0).animate(
-      CurvedAnimation(parent: _resetController, curve: Curves.easeOut),
-    );
+    _resetAnimation = Tween(
+      begin: _dragDy,
+      end: 0.0,
+    ).animate(CurvedAnimation(parent: _resetController, curve: Curves.easeOut));
     _resetController.forward(from: 0);
   }
 

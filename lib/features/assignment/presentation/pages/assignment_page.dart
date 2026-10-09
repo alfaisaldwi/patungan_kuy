@@ -6,11 +6,11 @@ import 'package:showcaseview/showcaseview.dart';
 
 import '../../../../core/onboarding/showcase_tour.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/app_dialog.dart';
 import '../../../scanner/domain/entities/parsed_receipt.dart';
 import '../bloc/assignment_bloc.dart';
 import '../models/assignment_models.dart';
 import '../models/assignment_result.dart';
-import '../../../../core/widgets/app_dialog.dart';
 
 class AssignmentPage extends StatelessWidget {
   final ParsedReceipt receipt;
